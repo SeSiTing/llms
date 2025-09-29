@@ -15,6 +15,17 @@ import { getThinkLevel } from "@/utils/thinking";
 import { createApiError } from "@/api/middleware";
 import { formatBase64 } from "@/utils/image";
 
+/**
+ * Anthropic 转换器类
+ *
+ * 核心功能：
+ * 1. 接收 Anthropic 格式的请求，转换为统一格式（transformRequestOut）
+ * 2. 将统一格式的响应转换回 Anthropic 格式（transformResponseIn）
+ * 3. 处理流式响应（SSE）的实时转换
+ * 4. 支持工具调用（Tool Use）、推理模式（Thinking）、图片等
+ *
+ * API 端点：/v1/messages（Anthropic Messages API）
+ */
 export class AnthropicTransformer implements Transformer {
   static TransformerName = "Anthropic";
   static endPoint = "/v1/messages";
@@ -24,6 +35,7 @@ export class AnthropicTransformer implements Transformer {
     this.useBearer = this.options?.UseBearer ?? false;
   }
 
+  // 认证处理：根据配置选择使用 x-api-key 或 Bearer 认证
   async auth(request: any, provider: LLMProvider): Promise<any> {
     const headers: Record<string, string | undefined> = {};
 
@@ -43,11 +55,22 @@ export class AnthropicTransformer implements Transformer {
     };
   }
 
+  /**
+   * 请求出站转换：将 Anthropic 格式转换为统一格式
+   *
+   * 转换内容：
+   * 1. 提取 system 消息（Anthropic 将 system 作为独立字段）
+   * 2. 转换消息列表（user、assistant、tool）
+   * 3. 处理工具调用和工具响应
+   * 4. 转换推理（thinking）配置
+   * 5. 处理图片内容
+   */
   async transformRequestOut(
     request: Record<string, any>
   ): Promise<UnifiedChatRequest> {
     const messages: UnifiedMessage[] = [];
 
+    // 处理 system 消息（Anthropic 将 system 作为独立字段）
     if (request.system) {
       if (typeof request.system === "string") {
         messages.push({
@@ -193,6 +216,20 @@ export class AnthropicTransformer implements Transformer {
     return result;
   }
 
+  /**
+   * 响应入站转换：将 OpenAI 格式响应转换为 Anthropic 格式
+   *
+   * 核心流程：
+   * 1. 判断是否为流式响应（SSE）
+   * 2. 流式响应：逐块转换 OpenAI SSE 为 Anthropic SSE
+   * 3. 非流式响应：直接转换 JSON 响应
+   *
+   * 流式响应转换：
+   * - message_start: 消息开始
+   * - content_block_start/delta/stop: 内容块（文本/工具调用/推理）
+   * - message_delta: 消息状态变更（stop_reason、usage）
+   * - message_stop: 消息结束
+   */
   async transformResponseIn(
     response: Response,
     context?: TransformerContext
@@ -201,6 +238,7 @@ export class AnthropicTransformer implements Transformer {
       .get("Content-Type")
       ?.includes("text/event-stream");
     if (isStream) {
+      // 流式响应：转换 SSE 流
       if (!response.body) {
         throw new Error("Stream response body is null");
       }
@@ -216,6 +254,7 @@ export class AnthropicTransformer implements Transformer {
         },
       });
     } else {
+      // 非流式响应：转换 JSON
       const data = await response.json();
       const anthropicResponse = this.convertOpenAIResponseToAnthropic(
         data,

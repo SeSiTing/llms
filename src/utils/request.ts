@@ -1,6 +1,12 @@
 import { ProxyAgent } from "undici";
 import { UnifiedChatRequest } from "../types/llm";
 
+// 发送统一格式的请求到 LLM 提供商
+// 核心功能：
+// 1. 设置 HTTP 请求头（包括认证信息）
+// 2. 处理超时和取消信号
+// 3. 支持 HTTPS 代理
+// 4. 记录请求日志
 export function sendUnifiedRequest(
   url: URL | string,
   request: UnifiedChatRequest,
@@ -8,6 +14,7 @@ export function sendUnifiedRequest(
   logger?: any,
   context: any
 ): Promise<Response> {
+  // 构建 HTTP 请求头
   const headers = new Headers({
     "Content-Type": "application/json",
   });
@@ -18,10 +25,13 @@ export function sendUnifiedRequest(
       }
     });
   }
+
+  // 处理超时和取消信号
   let combinedSignal: AbortSignal;
-  const timeoutSignal = AbortSignal.timeout(config.TIMEOUT ?? 60 * 1000 * 60);
+  const timeoutSignal = AbortSignal.timeout(config.TIMEOUT ?? 60 * 1000 * 60); // 默认 60 分钟超时
 
   if (config.signal) {
+    // 合并外部信号和超时信号
     const controller = new AbortController();
     const abortHandler = () => controller.abort();
     config.signal.addEventListener("abort", abortHandler);
@@ -31,6 +41,7 @@ export function sendUnifiedRequest(
     combinedSignal = timeoutSignal;
   }
 
+  // 构建 fetch 请求选项
   const fetchOptions: RequestInit = {
     method: "POST",
     headers: headers,
@@ -38,11 +49,14 @@ export function sendUnifiedRequest(
     signal: combinedSignal,
   };
 
+  // 配置 HTTPS 代理（如果提供）
   if (config.httpsProxy) {
     (fetchOptions as any).dispatcher = new ProxyAgent(
       new URL(config.httpsProxy).toString()
     );
   }
+
+  // 记录最终请求信息
   logger?.debug(
     {
       reqId: context.req.id,
@@ -53,5 +67,7 @@ export function sendUnifiedRequest(
     },
     "final request"
   );
+
+  // 发送 HTTP 请求
   return fetch(typeof url === "string" ? url : url.toString(), fetchOptions);
 }

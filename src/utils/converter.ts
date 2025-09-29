@@ -12,6 +12,9 @@ import {
 } from "../types/llm";
 import { log } from "./log";
 
+// ==================== 工具定义转换 ====================
+
+// 将统一格式的工具定义转换为 OpenAI 格式
 export function convertToolsToOpenAI(
   tools: UnifiedTool[]
 ): ChatCompletionTool[] {
@@ -25,6 +28,7 @@ export function convertToolsToOpenAI(
   }));
 }
 
+// 将统一格式的工具定义转换为 Anthropic 格式
 export function convertToolsToAnthropic(tools: UnifiedTool[]): AnthropicTool[] {
   return tools.map((tool) => ({
     name: tool.function.name,
@@ -33,6 +37,7 @@ export function convertToolsToAnthropic(tools: UnifiedTool[]): AnthropicTool[] {
   }));
 }
 
+// 将 OpenAI 格式的工具定义转换为统一格式
 export function convertToolsFromOpenAI(
   tools: ChatCompletionTool[]
 ): UnifiedTool[] {
@@ -46,6 +51,7 @@ export function convertToolsFromOpenAI(
   }));
 }
 
+// 将 Anthropic 格式的工具定义转换为统一格式
 export function convertToolsFromAnthropic(
   tools: AnthropicTool[]
 ): UnifiedTool[] {
@@ -59,6 +65,13 @@ export function convertToolsFromAnthropic(
   }));
 }
 
+// ==================== 请求格式转换 ====================
+
+// 将统一格式的请求转换为 OpenAI 格式
+// 核心逻辑：
+// 1. 处理 system 消息
+// 2. 转换消息列表（包括工具调用和工具响应）
+// 3. 处理工具定义和工具选择
 export function convertToOpenAI(
   request: UnifiedChatRequest
 ): OpenAIChatRequest {
