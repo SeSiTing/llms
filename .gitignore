@@ -6,6 +6,5 @@ node_modules
 .vscode
 *.log
 .env
-config.json
 .idea
 .cursor

@@ -1,0 +1,32 @@
+{
+  "LOG": true,
+  "LOG_LEVEL": "debug",
+  "HOST": "127.0.0.1",
+  "PORT": 3000,
+  "API_TIMEOUT_MS": "600000",
+  "PROXY_URL": "http://127.0.0.1:7890",
+  "Providers": [
+    {
+      "id": "openai",
+      "name": "openai",
+      "type": "openai",
+      "baseUrl": "https://api.openai.com/v1/chat/completions",
+      "apiKey": "$OPENAI_API_KEY",
+      "models": [
+        "gpt-4o",
+        "gpt-5"
+      ],
+      "transformer": {
+        "use": ["openai"]
+      }
+    }
+  ],
+  "Router": {
+    "default": "openai,gpt-5",
+    "background": "openai,gpt-4o",
+    "longContext": "openai,gpt-5",
+    "longContextThreshold": 60000,
+    "webSearch": "openai,gpt-5"
+  }
+}
+
