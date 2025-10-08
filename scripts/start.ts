@@ -22,19 +22,51 @@ const interpolateEnvVars = (obj: any): any => {
   return obj;
 };
 
+// 读取并合并配置文件（支持 extends）
+const loadConfigFile = (configPath: string): any => {
+  const configContent = readFileSync(configPath, "utf-8");
+  const config = JSON.parse(configContent);
+  
+  // 如果有 extends 字段，读取并合并扩展配置
+  if (config.extends) {
+    let baseConfigPath: string;
+    
+    // 支持简写：如果不包含路径分隔符且不以 .json 结尾，使用简写规则
+    // 例如: "openai" -> "configs/config-openai.json"
+    if (!config.extends.includes('/') && !config.extends.endsWith('.json')) {
+      baseConfigPath = join(process.cwd(), `configs/config-${config.extends}.json`);
+    } else {
+      baseConfigPath = join(process.cwd(), config.extends);
+    }
+    
+    if (existsSync(baseConfigPath)) {
+      const baseConfig = loadConfigFile(baseConfigPath);
+      // 合并配置：当前配置覆盖基础配置
+      return { ...baseConfig, ...config, extends: undefined };
+    } else {
+      console.warn(`Extended config file not found: ${baseConfigPath}`);
+    }
+  }
+  
+  return config;
+};
+
 // 读取配置文件
 const readConfig = () => {
   const configPaths = [
     join(process.cwd(), "config.json"),
     join(homedir(), ".llms", "config.json"),
     process.env.LLMS_CONFIG_PATH
-  ].filter(Boolean);
+  ].filter((p): p is string => Boolean(p));
 
   for (const configPath of configPaths) {
     if (existsSync(configPath)) {
       try {
-        const configContent = readFileSync(configPath, "utf-8");
-        const config = JSON.parse(configContent);
+        const config = loadConfigFile(configPath);
+        console.log(`Loaded config from: ${configPath}`);
+        if (config.extends) {
+          console.log(`  extends: ${config.extends}`);
+        }
         return interpolateEnvVars(config);
       } catch (error) {
         console.error(`Failed to parse config file ${configPath}:`, error);
