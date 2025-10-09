@@ -56,6 +56,12 @@ export function sendUnifiedRequest(
     );
   }
 
+  // 设置连接超时（默认30秒）
+  const connectTimeout = config.CONNECT_TIMEOUT ?? 30 * 1000;
+  if ((fetchOptions as any).dispatcher) {
+    (fetchOptions as any).dispatcher.connectTimeout = connectTimeout;
+  }
+
   // 记录最终请求信息
   logger?.debug(
     {
