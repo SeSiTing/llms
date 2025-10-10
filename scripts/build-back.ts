@@ -10,7 +10,7 @@ const baseConfig: esbuild.BuildOptions = {
   platform: "node",
   target: "node18",
   plugins: [],
-  external: ["fastify", "dotenv", "@fastify/cors", "undici", "pino"],
+  external: ["fastify", "dotenv", "@fastify/cors", "undici"],
 };
 
 const cjsConfig: esbuild.BuildOptions = {
@@ -27,55 +27,36 @@ const esmConfig: esbuild.BuildOptions = {
   outExtension: { ".js": ".mjs" },
 };
 
-const startConfig: esbuild.BuildOptions = {
-  entryPoints: ["scripts/start.ts"],
-  bundle: true,
-  minify: true,
-  sourcemap: true,
-  platform: "node",
-  target: "node18",
-  plugins: [],
-  external: ["fastify", "dotenv", "@fastify/cors", "undici", "pino"],
-  outdir: "dist",
-  format: "esm",
-  outExtension: { ".js": ".mjs" },
-};
-
-async function build() {
-  console.log("Building CJS, ESM and Start versions...");
+async function buildBack() {
+  console.log("Building CJS and ESM versions...");
   
   const cjsCtx = await esbuild.context(cjsConfig);
   const esmCtx = await esbuild.context(esmConfig);
-  const startCtx = await esbuild.context(startConfig);
 
   if (watch) {
     console.log("Watching for changes...");
     await Promise.all([
       cjsCtx.watch(),
       esmCtx.watch(),
-      startCtx.watch(),
     ]);
   } else {
     await Promise.all([
       cjsCtx.rebuild(),
       esmCtx.rebuild(),
-      startCtx.rebuild(),
     ]);
     
     await Promise.all([
       cjsCtx.dispose(),
       esmCtx.dispose(),
-      startCtx.dispose(),
     ]);
     
     console.log("✅ Build completed successfully!");
     console.log("  - CJS: dist/cjs/server.cjs");
     console.log("  - ESM: dist/esm/server.mjs");
-    console.log("  - Start: dist/start.mjs");
   }
 }
 
-build().catch((err) => {
+buildBack().catch((err) => {
   console.error(err);
   process.exit(1);
 });
