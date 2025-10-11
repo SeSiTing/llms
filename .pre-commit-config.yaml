@@ -1,0 +1,67 @@
+repos:
+  # 检测 AI API Keys - 支持 OpenAI/Anthropic/Google 等主流 AI 服务
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: Detect AI API Keys
+        exclude: |
+          (?x)^(
+            package\.lock\.json|
+            yarn\.lock
+          )$
+
+  # 额外检查示例文件 - 防止真实密钥混入模板
+  - repo: local
+    hooks:
+      - id: check-ai-keys
+        name: Check AI Keys in All Files
+        entry: |
+          bash -c '
+            # 检测 AI API Key 模式
+            AI_KEY_PATTERNS=(
+              # OpenAI
+              "sk-[a-zA-Z0-9]{30,}"
+              "sk-proj-[a-zA-Z0-9]{30,}"
+              
+              # Anthropic (Claude)
+              "sk-ant-api[0-9]+-[a-zA-Z0-9]{20,}"
+              
+              # Google AI
+              "AIza[0-9A-Za-z_-]{20,}"
+              
+              # OpenRouter
+              "sk-or-v1-[a-zA-Z0-9]{30,}"
+              
+              # 阿里云百炼 (Bailian/DashScope)
+              "sk-[a-f0-9]{32}"
+              
+              # 月之暗面 (Moonshot/Kimi)
+              "sk-[a-zA-Z0-9]{48}"
+              
+              # 智谱 AI (ChatGLM/GLM)
+              "[a-f0-9]{32}\.[a-zA-Z0-9]{6,}"
+              
+              # 百度文心 (ERNIE)
+              "[a-zA-Z0-9]{24}"
+              
+              # 讯飞星火 (iFlytek Spark)
+              "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+              
+              # DeepSeek
+              "sk-[a-f0-9]{32}"
+            )
+            
+            # 构建正则表达式
+            PATTERN=$(IFS="|"; echo "${AI_KEY_PATTERNS[*]}")
+            
+            # 检查暂存区变更
+            if git diff --cached | grep -E "^\+.*(KEY|SECRET|TOKEN).*=.*($PATTERN)"; then
+              echo "❌ 检测到真实 AI API Key！"
+              echo "💡 支持的服务: OpenAI, Anthropic, Google, OpenRouter, 百炼, 月之暗面, 智谱, 文心, 星火, DeepSeek"
+              echo "💡 请使用占位符，如: your_api_key_here"
+              exit 1
+            fi
+          '
+        language: system
+        files: \.(py|js|ts|json|yml|yaml|env|example|sample|template|md|txt|sh)$
