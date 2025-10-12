@@ -4,7 +4,7 @@
 
 ```bash
 # 登录 Harbor
-echo "Gitlabci123" | docker login --username gitlabci --password-stdin harbor.blacklake.tech
+docker login harbor.blacklake.tech
 
 # 构建镜像
 docker build -t harbor.blacklake.tech/ai/llms:latest .
