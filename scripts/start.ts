@@ -26,8 +26,7 @@ const getDefaultModel = (config: StartupConfig): string => {
  * 主启动函数
  * 
  * 1. 读取配置文件
- * 2. 创建并启动服务器
- * 3. 注册提供商
+ * 2. 创建并启动服务器（providers 通过 initialConfig 自动注册）
  */
 async function start() {
   try {
@@ -41,6 +40,8 @@ async function start() {
       initialConfig: {
         HOST: host,
         PORT: String(port),
+        providers: config.providers,
+        Router: config.Router
       }
     });
     
@@ -70,56 +71,6 @@ async function start() {
     
     // 启动服务器
     await server.start();
-    
-    // 如果配置文件存在，注册提供商（在服务器启动后）
-    if (config && config.providers) {
-      logger.info({ msg: '🔧 提供商配置' });
-      
-      for (const provider of config.providers) {
-        try {
-          // 配置文件结构与 src 保持一致，直接使用
-          const providerData = { ...provider };
-          
-          logger.info({ msg: `📋 ${provider.name} (${provider.type})` });
-          logger.info({ msg: `📍 Base URL: ${provider.baseUrl}` });
-          
-          // 安全显示 API Key（显示后6位）
-          if (provider.apiKey && !provider.apiKey.startsWith('$')) {
-            const maskedKey = `...${provider.apiKey.slice(-6)}`;
-            logger.info({ msg: `🔑 API Key: ✅ ${maskedKey}` });
-          } else {
-            logger.info({ msg: '🔑 API Key: ❌ 缺失' });
-          }
-          
-          logger.info({ msg: `🤖 模型数量: ${providerData.models?.length || 0}` });
-          if (providerData.models?.length > 0) {
-            logger.info({ msg: `模型列表: ${providerData.models.slice(0, 3).join(', ')}${providerData.models.length > 3 ? '...' : ''}` });
-          }
-          
-          logger.info({ msg: '🔄 正在注册...' });
-          
-          const response = await fetch(
-            `http://127.0.0.1:${port}${API_ENDPOINTS.PROVIDERS}`, 
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(providerData)
-            }
-          );
-          
-          if (response.ok) {
-            logger.info({ msg: '✅ 注册成功' });
-          } else {
-            const errorText = await response.text();
-            logger.error({ err: new Error(errorText) }, '❌ 注册失败');
-          }
-        } catch (error) {
-          logger.error({ err: error as Error }, '❌ 注册错误');
-        }
-      }
-      
-      logger.info({ msg: '🎉 所有提供商配置完成！' });
-    }
   } catch (error) {
     logger.error({ err: error as Error }, '启动服务器失败');
     process.exit(1);
