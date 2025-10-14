@@ -10,8 +10,8 @@
       "id": "openrouter",
       "name": "openrouter",
       "type": "openai",
-      "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
-      "apiKey": "${OPENROUTER_API_KEY}",
+      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key": "${OPENROUTER_API_KEY}",
       "models": [
         "x-ai/grok-code-fast-1",
         "anthropic/claude-sonnet-4.5",
