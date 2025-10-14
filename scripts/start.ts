@@ -34,7 +34,15 @@ async function start() {
     // 读取配置文件
     const config = loadConfig();
     
-    const server = new Server();
+    const port = config?.PORT || process.env.PORT || SERVER_DEFAULTS.PORT;
+    const host = config?.HOST || process.env.HOST || SERVER_DEFAULTS.HOST;
+    
+    const server = new Server({
+      initialConfig: {
+        HOST: host,
+        PORT: String(port),
+      }
+    });
     
     // 添加路由中间件（在服务器启动前）
     server.addHook('preHandler', async (req: any, reply: any) => {
@@ -91,7 +99,7 @@ async function start() {
           logger.info({ msg: '🔄 正在注册...' });
           
           const response = await fetch(
-            `http://localhost:${config.PORT || SERVER_DEFAULTS.PORT}${API_ENDPOINTS.PROVIDERS}`, 
+            `http://127.0.0.1:${port}${API_ENDPOINTS.PROVIDERS}`, 
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
