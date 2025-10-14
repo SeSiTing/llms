@@ -21,9 +21,9 @@ export interface ConfigProvider {
   /** 提供商类型（如 "openai", "anthropic"） */
   type: string;
   /** API 基础 URL */
-  baseUrl: string;
+  api_base_url: string;
   /** API 密钥 */
-  apiKey: string;
+  api_key: string;
   /** 支持的模型列表 */
   models: string[];
   /** 转换器配置 */
