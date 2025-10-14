@@ -34,6 +34,10 @@ docker push harbor.blacklake.tech/ai/llms:latest
 # 带版本号
 docker build -t harbor.blacklake.tech/ai/llms:v1.0.0 .
 docker push harbor.blacklake.tech/ai/llms:v1.0.0
+
+# 如果已构建好镜像，重新打标签后推送
+docker tag sesiting/llms:latest harbor.blacklake.tech/ai/llms:latest
+docker push harbor.blacklake.tech/ai/llms:latest
 ```
 
 ## 独立运行
