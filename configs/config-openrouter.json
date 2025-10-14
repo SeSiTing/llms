@@ -5,18 +5,19 @@
   "PORT": 3000,
   "API_TIMEOUT_MS": "600000",
   "PROXY_URL": "http://127.0.0.1:7890",
-  "Providers": [
+  "providers": [
     {
       "id": "openrouter",
       "name": "openrouter",
       "type": "openai",
       "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
-      "apiKey": "$OPENROUTER_API_KEY",
+      "apiKey": "${OPENROUTER_API_KEY}",
       "models": [
-        "anthropic/claude-3.7-sonnet",
-        "anthropic/claude-4.0",
-        "anthropic/claude-4.5",
-        "google/gemini-2.5-flash"
+        "x-ai/grok-code-fast-1",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-sonnet-4",
+        "google/gemini-2.5-flash",
+        "x-ai/grok-4-fast"
       ],
       "transformer": {
         "use": ["openrouter"]
@@ -24,11 +25,7 @@
     }
   ],
   "Router": {
-    "default": "openrouter,anthropic/claude-4.5",
-    "background": "openrouter,anthropic/claude-3.7-sonnet",
-    "longContext": "openrouter,anthropic/claude-4.0",
-    "longContextThreshold": 60000,
-    "webSearch": "openrouter,google/gemini-2.5-flash"
+    "default": "openrouter,anthropic/claude-sonnet-4.5"
   }
 }
 
