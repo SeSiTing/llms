@@ -1,7 +1,7 @@
 {
   "LOG": true,
   "LOG_LEVEL": "debug",
-  "HOST": "127.0.0.1",
+  "HOST": "0.0.0.0",
   "PORT": 3000,
   "API_TIMEOUT_MS": "600000",
   "PROXY_URL": "http://127.0.0.1:7890",
