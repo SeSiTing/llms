@@ -1,177 +1,62 @@
 import Server from "../src/server.js";
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
-import { homedir } from "os";
+import type { 
+  StartupConfig, 
+  ConfigProvider, 
+  RequestBody 
+} from "../custom/types/config.types.js";
+import { 
+  SERVER_DEFAULTS, 
+  API_ENDPOINTS
+} from "../custom/constants/server.constants.js";
+import { loadConfig } from "../custom/services/config-loader.js";
+import { logger } from "../custom/services/logger.js";
 
-// 环境变量插值函数
-const interpolateEnvVars = (obj: any): any => {
-  if (typeof obj === "string") {
-    return obj.replace(/\$\{([^}]+)\}|\$([A-Z_][A-Z0-9_]*)/g, (match, braced, unbraced) => {
-      const varName = braced || unbraced;
-      return process.env[varName] || match;
-    });
-  } else if (Array.isArray(obj)) {
-    return obj.map(interpolateEnvVars);
-  } else if (obj !== null && typeof obj === "object") {
-    const result: any = {};
-    for (const [key, value] of Object.entries(obj)) {
-      result[key] = interpolateEnvVars(value);
-    }
-    return result;
-  }
-  return obj;
+
+
+/**
+ * 获取使用的模型
+ * 
+ * 简化设计：统一使用配置的默认模型
+ */
+const getDefaultModel = (config: StartupConfig): string => {
+  return config.Router?.default || SERVER_DEFAULTS.DEFAULT_MODEL;
 };
 
-// 读取并合并配置文件（支持 extends）
-const loadConfigFile = (configPath: string): any => {
-  const configContent = readFileSync(configPath, "utf-8");
-  const config = JSON.parse(configContent);
-  
-  // 如果有 extends 字段，读取并合并扩展配置
-  if (config.extends) {
-    let baseConfigPath: string;
-    
-    // 支持简写：如果不包含路径分隔符且不以 .json 结尾，使用简写规则
-    // 例如: "openai" -> "configs/config-openai.json"
-    if (!config.extends.includes('/') && !config.extends.endsWith('.json')) {
-      baseConfigPath = join(process.cwd(), `configs/config-${config.extends}.json`);
-    } else {
-      baseConfigPath = join(process.cwd(), config.extends);
-    }
-    
-    if (existsSync(baseConfigPath)) {
-      const baseConfig = loadConfigFile(baseConfigPath);
-      // 合并配置：当前配置覆盖基础配置
-      return { ...baseConfig, ...config, extends: undefined };
-    } else {
-      console.warn(`Extended config file not found: ${baseConfigPath}`);
-    }
-  }
-  
-  return config;
-};
-
-// 读取配置文件
-const readConfig = () => {
-  const configPaths = [
-    join(process.cwd(), "config.json"),
-    join(homedir(), ".llms", "config.json"),
-    process.env.LLMS_CONFIG_PATH
-  ].filter((p): p is string => Boolean(p));
-
-  for (const configPath of configPaths) {
-    if (existsSync(configPath)) {
-      try {
-        const config = loadConfigFile(configPath);
-        console.log(`Loaded config from: ${configPath}`);
-        if (config.extends) {
-          console.log(`  extends: ${config.extends}`);
-        }
-        return interpolateEnvVars(config);
-      } catch (error) {
-        console.error(`Failed to parse config file ${configPath}:`, error);
-      }
-    }
-  }
-  
-  console.log("No config file found, using default configuration");
-  return null;
-};
-
-// 计算 token 数量（简化版）
-const calculateTokenCount = (messages: any[], system: any[] = [], tools: any[] = []): number => {
-  let tokenCount = 0;
-  
-  // 简化的 token 计算：每个字符约 0.25 tokens
-  const countTokens = (text: string) => Math.ceil(text.length * 0.25);
-  
-  messages.forEach(msg => {
-    if (msg.content) {
-      tokenCount += countTokens(JSON.stringify(msg.content));
-    }
-  });
-  
-  system.forEach(sys => {
-    if (sys.text) {
-      tokenCount += countTokens(sys.text);
-    }
-  });
-  
-  if (tools && tools.length > 0) {
-    tokenCount += countTokens(JSON.stringify(tools));
-  }
-  
-  return tokenCount;
-};
-
-// 路由逻辑（参考 claude-code-router）
-const getUseModel = (req: any, tokenCount: number, config: any): string => {
-  // 1. 如果请求已经包含 provider,model 格式，直接验证并返回
-  if (req.body.model && req.body.model.includes(",")) {
-    const [provider, model] = req.body.model.split(",");
-    const finalProvider = config.Providers.find((p: any) => p.name.toLowerCase() === provider.toLowerCase());
-    const finalModel = finalProvider?.models?.find((m: any) => m.toLowerCase() === model.toLowerCase());
-    if (finalProvider && finalModel) {
-      return `${finalProvider.name},${finalModel}`;
-    }
-    return req.body.model;
-  }
-
-  // 2. 根据 token 数量选择长上下文模型
-  const longContextThreshold = config.Router?.longContextThreshold || 60000;
-  if (tokenCount > longContextThreshold && config.Router?.longContext) {
-    console.log(`Using long context model due to token count: ${tokenCount}, threshold: ${longContextThreshold}`);
-    return config.Router.longContext;
-  }
-
-  // 3. 根据特定模型名称选择背景模型
-  if (req.body.model?.startsWith("claude-3-5-haiku") && config.Router?.background) {
-    console.log(`Using background model for ${req.body.model}`);
-    return config.Router.background;
-  }
-
-  // 4. 根据工具类型选择搜索模型
-  if (req.body.tools && Array.isArray(req.body.tools) && 
-      req.body.tools.some((tool: any) => tool.type?.startsWith("web_search")) && 
-      config.Router?.webSearch) {
-    return config.Router.webSearch;
-  }
-
-  // 5. 默认使用配置的默认模型
-  return config.Router?.default || "openrouter,anthropic/claude-3.5-sonnet";
-};
-
+/**
+ * 主启动函数
+ * 
+ * 1. 读取配置文件
+ * 2. 创建并启动服务器
+ * 3. 注册提供商
+ */
 async function start() {
   try {
     // 读取配置文件
-    const config = readConfig();
+    const config = loadConfig();
     
     const server = new Server();
     
     // 添加路由中间件（在服务器启动前）
-    server.app.addHook('preHandler', async (req: any, reply: any) => {
+    server.addHook('preHandler', async (req: any, reply: any) => {
       // 跳过非POST请求和API端点
-      if (req.method !== 'POST' || req.url.startsWith('/api') || req.url.startsWith('/providers')) {
+      if (req.method !== 'POST' || 
+          req.url.startsWith(API_ENDPOINTS.API_PREFIX) || 
+          req.url.startsWith(API_ENDPOINTS.PROVIDERS)) {
         return;
       }
       
-      const body = req.body as any;
+      const body = req.body as RequestBody;
       if (!body || !body.model) {
         return;
       }
       
-      // 如果模型名称不包含逗号，说明是直接模型名称，需要路由
+      // 如果模型名称不包含逗号，说明需要使用默认模型
       if (!body.model.includes(',')) {
-        if (config && config.Router) {
-          const tokenCount = calculateTokenCount(body.messages || [], body.system || [], body.tools || []);
-          const routedModel = getUseModel(req, tokenCount, config);
-          console.log(`🔄 Routing model ${body.model} → ${routedModel}`);
-          body.model = routedModel;
-        } else {
-          // 如果没有配置文件，使用默认路由
-          body.model = "openrouter,anthropic/claude-3.5-sonnet";
-          console.log(`🔄 Using default routing: ${body.model}`);
-        }
+        const defaultModel = config && config.Router 
+          ? getDefaultModel(config)
+          : SERVER_DEFAULTS.DEFAULT_MODEL;
+        req.log.info({ original: body.model, routed: defaultModel }, '🔄 使用默认模型');
+        body.model = defaultModel;
       }
     });
     
@@ -179,37 +64,56 @@ async function start() {
     await server.start();
     
     // 如果配置文件存在，注册提供商（在服务器启动后）
-    if (config && config.Providers) {
-      console.log("Registering providers from config...");
+    if (config && config.providers) {
+      logger.info({ msg: '🔧 提供商配置' });
       
-      for (const provider of config.Providers) {
+      for (const provider of config.providers) {
         try {
-          const response = await fetch(`http://localhost:${config.PORT || 3000}/providers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: provider.id,
-              name: provider.name,
-              type: provider.type,
-              baseUrl: provider.baseUrl,
-              apiKey: provider.apiKey,
-              models: provider.models,
-              transformer: provider.transformer
-            })
-          });
+          // 配置文件结构与 src 保持一致，直接使用
+          const providerData = { ...provider };
+          
+          logger.info({ msg: `📋 ${provider.name} (${provider.type})` });
+          logger.info({ msg: `📍 Base URL: ${provider.baseUrl}` });
+          
+          // 安全显示 API Key（显示后6位）
+          if (provider.apiKey && !provider.apiKey.startsWith('$')) {
+            const maskedKey = `...${provider.apiKey.slice(-6)}`;
+            logger.info({ msg: `🔑 API Key: ✅ ${maskedKey}` });
+          } else {
+            logger.info({ msg: '🔑 API Key: ❌ 缺失' });
+          }
+          
+          logger.info({ msg: `🤖 模型数量: ${providerData.models?.length || 0}` });
+          if (providerData.models?.length > 0) {
+            logger.info({ msg: `模型列表: ${providerData.models.slice(0, 3).join(', ')}${providerData.models.length > 3 ? '...' : ''}` });
+          }
+          
+          logger.info({ msg: '🔄 正在注册...' });
+          
+          const response = await fetch(
+            `http://localhost:${config.PORT || SERVER_DEFAULTS.PORT}${API_ENDPOINTS.PROVIDERS}`, 
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(providerData)
+            }
+          );
           
           if (response.ok) {
-            console.log(`✅ Registered provider: ${provider.name}`);
+            logger.info({ msg: '✅ 注册成功' });
           } else {
-            console.error(`❌ Failed to register provider ${provider.name}:`, await response.text());
+            const errorText = await response.text();
+            logger.error({ err: new Error(errorText) }, '❌ 注册失败');
           }
         } catch (error) {
-          console.error(`❌ Error registering provider ${provider.name}:`, error);
+          logger.error({ err: error as Error }, '❌ 注册错误');
         }
       }
+      
+      logger.info({ msg: '🎉 所有提供商配置完成！' });
     }
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error({ err: error as Error }, '启动服务器失败');
     process.exit(1);
   }
 }
