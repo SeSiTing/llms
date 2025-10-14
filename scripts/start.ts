@@ -69,6 +69,31 @@ async function start() {
       }
     });
     
+    // 打印提供商配置信息
+    if (config && config.providers) {
+      logger.info({ msg: '🔧 提供商配置' });
+      
+      for (const provider of config.providers) {
+        logger.info({ msg: `📋 ${provider.name} (${provider.type})` });
+        logger.info({ msg: `📍 Base URL: ${provider.api_base_url}` });
+        
+        // 安全显示 API Key
+        if (provider.api_key && !provider.api_key.startsWith('$') && !provider.api_key.startsWith('${')) {
+          const maskedKey = `...${provider.api_key.slice(-6)}`;
+          logger.info({ msg: `🔑 API Key: ✅ ${maskedKey}` });
+        } else {
+          logger.info({ msg: `🔑 API Key: 🔐 使用环境变量` });
+        }
+        
+        logger.info({ msg: `🤖 模型数量: ${provider.models?.length || 0}` });
+        if (provider.models?.length > 0) {
+          logger.info({ 
+            msg: `模型列表: ${provider.models.slice(0, 3).join(', ')}${provider.models.length > 3 ? '...' : ''}` 
+          });
+        }
+      }
+    }
+    
     // 启动服务器
     await server.start();
   } catch (error) {
