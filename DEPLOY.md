@@ -6,7 +6,21 @@
 - **Docker Hub**: `sesiting/llms:latest`（推荐，公开访问）
 - **Harbor**: `harbor.blacklake.tech/ai/llms:latest`（私有仓库）
 
+## 版本号规范
+
+采用语义化版本 `MAJOR.MINOR.PATCH`（不带 v 前缀）：
+- **格式**: `1.0.0`（主版本.次版本.修订号）
+- **示例**: `1.0.0`、`1.1.0`、`1.0.1`
+- **标签策略**: 精确版本 + `latest`（两层标签，简单清晰）
+
 ## 构建推送流程
+
+### 环境变量设置
+
+```bash
+# 设置版本号（修改此处即可）
+export tag=1.0.1
+```
 
 ### 方式一：Docker Hub（传统方式）
 
@@ -16,13 +30,14 @@
 # 1. 登录
 docker login
 
-# 2. 本地构建
-docker build -t sesiting/llms:latest .
+# 2. 本地构建（同时打两个标签）
+docker build -t sesiting/llms:${tag} -t sesiting/llms:latest .
 
 # 3. 本地测试
 docker run -d --name llms -p 3009:3000 --env-file .env sesiting/llms:latest
 
 # 4. 确认无误后推送
+docker push sesiting/llms:${tag}
 docker push sesiting/llms:latest
 ```
 
@@ -37,14 +52,16 @@ docker buildx create --use --name multi-builder
 # 登录
 docker login harbor.blacklake.tech
 
-# 构建 Linux 平台镜像
+# 构建 Linux 平台镜像（同时打两个标签）
 docker buildx build \
   --platform linux/amd64 \
+  -t harbor.blacklake.tech/ai/llms:${tag} \
   -t harbor.blacklake.tech/ai/llms:latest \
   --load \
   .
 
 # 推送
+docker push harbor.blacklake.tech/ai/llms:${tag}
 docker push harbor.blacklake.tech/ai/llms:latest
 ```
 
@@ -53,9 +70,11 @@ docker push harbor.blacklake.tech/ai/llms:latest
 ```bash
 # 从 Docker Hub 拉取
 docker pull sesiting/llms:latest
+docker pull sesiting/llms:${tag}
 
 # 从 Harbor 拉取
 docker pull harbor.blacklake.tech/ai/llms:latest
+docker pull harbor.blacklake.tech/ai/llms:${tag}
 ```
 
 ## 独立运行
@@ -95,7 +114,7 @@ docker run -d \
 # 或使用 Harbor 镜像
 docker run -d \
   --name llms \
-  -p 3009:3000 \
+  -p 3008:3000 \
   --env-file .env \
   harbor.blacklake.tech/ai/llms:latest
 ```
