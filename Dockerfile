@@ -1,5 +1,13 @@
 FROM node:20-slim
 
+# 构建参数
+ARG VERSION=1.0.2
+
+# 镜像元数据
+LABEL org.opencontainers.image.title="LLMs" \
+      org.opencontainers.image.description="A universal LLM API transformation server" \
+      org.opencontainers.image.version="${VERSION}"
+
 WORKDIR /app/llms
 
 # 复制依赖文件
