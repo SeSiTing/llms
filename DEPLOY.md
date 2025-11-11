@@ -15,12 +15,24 @@
 
 ## 构建推送流程
 
-### 环境变量设置
+### 版本管理说明
+
+**版本号唯一来源**：`Dockerfile` 中的 `ARG VERSION` 字段
+
+```dockerfile
+# Dockerfile
+ARG VERSION=1.0.2
+```
+
+**环境变量设置**（自动读取版本号）：
 
 ```bash
-# 设置版本号（修改此处即可）
-export tag=1.0.1
+# 从 Dockerfile 自动读取版本号并设置到 $VERSION，并打印输出
+export VERSION=$(grep -E '^ARG VERSION=' Dockerfile | sed 's/ARG VERSION=//' | tr -d ' ')
+echo "当前版本: $VERSION"
 ```
+
+> **注意**：不要手动设置 `export VERSION=1.0.2`，应该始终从 Dockerfile 自动读取，确保版本一致性。更新版本时，只需修改 Dockerfile 中的 `ARG VERSION` 值。
 
 ### 方式一：Docker Hub（传统方式）
 
@@ -30,14 +42,18 @@ export tag=1.0.1
 # 1. 登录
 docker login
 
-# 2. 本地构建（同时打两个标签）
-docker build -t sesiting/llms:${tag} -t sesiting/llms:latest .
+# 2. 从 Dockerfile 读取版本号
+export VERSION=$(grep -E '^ARG VERSION=' Dockerfile | sed 's/ARG VERSION=//' | tr -d ' ')
+echo "当前版本: $VERSION"
 
-# 3. 本地测试
-docker run -d --name llms -p 3009:3000 --env-file .env sesiting/llms:latest
+# 3. 本地构建（同时打两个标签）
+docker build -t sesiting/llms:${VERSION} -t sesiting/llms:latest .
 
-# 4. 确认无误后推送
-docker push sesiting/llms:${tag}
+# 4. 本地测试
+docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
+
+# 5. 确认无误后推送
+docker push sesiting/llms:${VERSION}
 docker push sesiting/llms:latest
 ```
 
@@ -52,16 +68,20 @@ docker buildx create --use --name multi-builder
 # 登录
 docker login harbor.blacklake.tech
 
+# 从 Dockerfile 读取版本号
+export VERSION=$(grep -E '^ARG VERSION=' Dockerfile | sed 's/ARG VERSION=//' | tr -d ' ')
+echo "当前版本: $VERSION"
+
 # 构建 Linux 平台镜像（同时打两个标签）
 docker buildx build \
   --platform linux/amd64 \
-  -t harbor.blacklake.tech/ai/llms:${tag} \
+  -t harbor.blacklake.tech/ai/llms:${VERSION} \
   -t harbor.blacklake.tech/ai/llms:latest \
   --load \
   .
 
 # 推送
-docker push harbor.blacklake.tech/ai/llms:${tag}
+docker push harbor.blacklake.tech/ai/llms:${VERSION}
 docker push harbor.blacklake.tech/ai/llms:latest
 ```
 
@@ -70,12 +90,14 @@ docker push harbor.blacklake.tech/ai/llms:latest
 ```bash
 # 从 Docker Hub 拉取
 docker pull sesiting/llms:latest
-docker pull sesiting/llms:${tag}
+docker pull sesiting/llms:${VERSION}
 
 # 从 Harbor 拉取
 docker pull harbor.blacklake.tech/ai/llms:latest
-docker pull harbor.blacklake.tech/ai/llms:${tag}
+docker pull harbor.blacklake.tech/ai/llms:${VERSION}
 ```
+
+> **注意**：使用 `${VERSION}` 前需要先执行版本号读取命令，或直接指定版本号（如 `sesiting/llms:1.0.2`）
 
 ## 独立运行
 
@@ -104,19 +126,14 @@ chmod 600 .env
 # 拉取镜像（自动选择匹配的架构）
 docker pull sesiting/llms:latest
 
-# 使用 .env 文件启动
-docker run -d \
-  --name llms \
-  -p 3009:3000 \
-  --env-file .env \
-  sesiting/llms:latest
+# 使用 .env 文件启动（使用 latest 标签）
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
 
 # 或使用 Harbor 镜像
-docker run -d \
-  --name llms \
-  -p 3008:3000 \
-  --env-file .env \
-  harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
+
+# 使用指定版本（推荐生产环境）
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:1.0.2
 ```
 
 ### 查看状态
