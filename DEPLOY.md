@@ -103,27 +103,47 @@ docker pull harbor.blacklake.tech/ai/llms:${VERSION}
 
 ### 环境配置
 
-使用 .env 文件管理环境变量（推荐）：
+**本地开发**：在 `~/.zshrc` 配置环境变量
 
 ```bash
-# 快速创建 .env 文件
+# 添加到 ~/.zshrc
+export OPENROUTER_API_KEY=your-key
+
+# 使配置生效
+source ~/.zshrc
+```
+
+**生产部署**：使用 .env 文件
+
+```bash
+# 创建 .env 文件
 echo "OPENROUTER_API_KEY=your-key" > .env
 
-# 或使用 cat（多行配置）
+# 或多行配置
 cat > .env << EOF
 OPENROUTER_API_KEY=your-key
 PORT=3000
 HOST=0.0.0.0
 EOF
-
-# 设置文件权限（可选）
-chmod 600 .env
 ```
+
+### 配置选择
+
+服务支持通过环境变量 `LLMS_CONFIG_PROFILE` 选择不同的配置文件：
+
+- **默认值**: `openrouter`（如果未设置，使用此默认值）
+- **可用配置**:
+  - `openrouter` - OpenRouter 配置，支持多种模型（Claude、Gemini、Grok 等）
+  - `openai` - OpenAI 原生配置
+
+配置文件位于 `configs/config-${profile}.json`。模型可通过系统界面动态选择。
 
 ### 启动服务
 
+**本地测试**（使用 zshrc 环境变量）：
+
 ```bash
-# 拉取镜像（自动选择匹配的架构）
+# 拉取镜像
 docker pull sesiting/llms:latest
 
 # 使用 .env 文件启动（使用 latest 标签）
@@ -136,11 +156,42 @@ docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped 
 docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:1.0.2
 ```
 
+**生产部署**（使用 .env 文件）：
+
+```bash
+# 拉取镜像
+docker pull sesiting/llms:latest
+
+# 默认配置（openrouter）
+docker run -d --name llms -p 3009:3000 --env-file .env sesiting/llms:latest
+
+# OpenAI 配置
+docker run -d --name llms-openai -p 3011:3000 --env-file .env -e LLMS_CONFIG_PROFILE=openai sesiting/llms:latest
+
+# Harbor 镜像
+docker run -d --name llms -p 3009:3000 --env-file .env harbor.blacklake.tech/ai/llms:latest
+```
+
+**说明**：
+- 本地测试：`-e OPENROUTER_API_KEY` 继承 zshrc 中的环境变量
+- 生产部署：`--env-file .env` 从文件加载环境变量
+- `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 openrouter）
+- 模型选择可通过系统界面动态切换
+
 ### 查看状态
 
 ```bash
 # 查看日志
 docker logs -f llms
+
+# 只看请求输入（精确匹配）
+docker logs -f llms 2>&1 | grep '"type":"request body"'
+
+# 只看实际发送到 API 的请求（包含目标模型和 URL）
+docker logs -f llms 2>&1 | grep '"msg":"final request"'
+
+# 同时看输入和发送的请求
+docker logs -f llms 2>&1 | grep -E '"type":"request body"|"msg":"final request"'
 
 # 测试服务
 curl http://localhost:3009/health
@@ -172,6 +223,7 @@ npm run dev
 | `PORT` | 3000 | 服务端口 |
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
+| `LLMS_CONFIG_PROFILE` | `openrouter` | 配置文件选择器（`openrouter` 或 `openai`） |
 
 ## 端口说明
 
