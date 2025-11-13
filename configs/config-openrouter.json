@@ -14,10 +14,17 @@
       "api_key": "${OPENROUTER_API_KEY}",
       "models": [
         "x-ai/grok-code-fast-1",
+        "x-ai/grok-4-fast",
         "anthropic/claude-sonnet-4.5",
-        "anthropic/claude-sonnet-4",
+        "anthropic/claude-haiku-4.5",
+        "anthropic/claude-opus-4.1",
         "google/gemini-2.5-flash",
-        "x-ai/grok-4-fast"
+        "google/gemini-2.5-pro",
+        "minimax/minimax-m2",
+        "openai/gpt-5.1",
+        "openai/gpt-5.1-chat",
+        "openai/gpt-5.1-codex",
+        "openai/gpt-5-image"
       ],
       "transformer": {
         "use": ["openrouter"]
