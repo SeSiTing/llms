@@ -25,6 +25,9 @@ RUN npm run build
 # 暴露端口
 EXPOSE 3000
 
+# 设置默认配置环境变量
+ENV LLMS_CONFIG_PROFILE=openrouter
+
 # 启动服务
 CMD ["npm", "start"]
 
