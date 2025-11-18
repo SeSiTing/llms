@@ -29,7 +29,7 @@ export const CONFIG_PATHS = [
 /**
  * 配置文件简写规则
  * 
- * 支持简写形式，例如 "openai" 会展开为 "configs/config-openai.json"
+ * 支持简写形式，例如 "default" 会展开为 "configs/config-default.json"
  */
 export const CONFIG_SHORTCUTS = {
   /** 配置文件所在目录 */

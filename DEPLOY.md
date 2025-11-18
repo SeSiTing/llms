@@ -112,10 +112,9 @@ echo -e "OPENROUTER_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
 
 服务支持通过环境变量 `LLMS_CONFIG_PROFILE` 选择不同的配置文件：
 
-- **默认值**: `openrouter`（如果未设置，使用此默认值）
+- **默认值**: `default`（如果未设置，使用此默认值）
 - **可用配置**:
-  - `openrouter` - OpenRouter 配置，支持多种模型（Claude、Gemini、Grok 等）
-  - `openai` - OpenAI 原生配置
+  - `default` - 通用配置，同时包含 OpenAI 和 OpenRouter 两个 provider，支持多种模型（GPT、Claude、Gemini、Grok 等）
 
 配置文件位于 `configs/config-${profile}.json`。模型可通过系统界面动态选择。
 
@@ -143,11 +142,8 @@ docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped 
 # 拉取镜像
 docker pull harbor.blacklake.tech/ai/llms:latest
 
-# 默认配置（openrouter）
+# 默认配置（default，包含 OpenAI 和 OpenRouter）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
-
-# OpenAI 配置
-docker run -d --name llms-openai -p 3011:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=openai harbor.blacklake.tech/ai/llms:latest
 
 # Debug 模式启动（查看详细日志）
 docker run -d --name llms-debug -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
@@ -156,7 +152,7 @@ docker run -d --name llms-debug -p 3009:3000 --restart unless-stopped --env-file
 **说明**：
 - 本地测试：`-e OPENROUTER_API_KEY` 继承 zshrc 中的环境变量
 - 生产部署：`--env-file .env` 从文件加载环境变量
-- `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 openrouter）
+- `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 default）
 - `-e LOG_LEVEL=debug` 可选，设置日志级别（`debug`、`info`、`warn`、`error`）
 - `-e NODE_ENV=development` 可选，启用美化日志输出（仅开发环境）
 - 模型选择可通过系统界面动态切换
@@ -181,6 +177,22 @@ curl http://localhost:3009/health
 
 # 查看容器信息
 docker ps | grep llms
+
+# 诊断命令（排查启动失败问题）
+# 查看完整日志（包括启动错误，注意替换容器名）
+docker logs llms-debug 2>&1
+
+# 查看最近 100 行日志
+docker logs --tail 100 llms-debug
+
+# 查看错误日志
+docker logs llms-debug 2>&1 | grep -i error
+
+# 查看容器退出状态（如果容器已停止）
+docker ps -a | grep llms
+
+# 查看容器退出代码
+docker inspect llms-debug --format='{{.State.ExitCode}}'
 ```
 
 ## 本地开发构建
@@ -218,7 +230,7 @@ npm run dev
 | `PORT` | 3000 | 服务端口 |
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
-| `LLMS_CONFIG_PROFILE` | `openrouter` | 配置文件选择器（`openrouter` 或 `openai`） |
+| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（默认 `default`，包含 OpenAI 和 OpenRouter） |
 | `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
 | `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
 

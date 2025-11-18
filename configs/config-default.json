@@ -7,6 +7,23 @@
   "PROXY_URL": "http://127.0.0.1:7890",
   "providers": [
     {
+      "id": "openai",
+      "name": "openai",
+      "type": "openai",
+      "api_base_url": "https://api.openai.com/v1/chat/completions",
+      "api_key": "${OPENAI_API_KEY}",
+      "models": [
+        "gpt-4o",
+        "gpt-5",
+        "gpt-5-pro",
+        "gpt-5.1",
+        "gpt-5.1-pro"
+      ],
+      "transformer": {
+        "use": ["openai"]
+      }
+    },
+    {
       "id": "openrouter",
       "name": "openrouter",
       "type": "openai",
@@ -21,6 +38,8 @@
         "google/gemini-2.5-flash",
         "google/gemini-2.5-pro",
         "minimax/minimax-m2",
+        "openai/gpt-5",
+        "openai/gpt-5-pro",
         "openai/gpt-5.1",
         "openai/gpt-5.1-chat",
         "openai/gpt-5.1-codex",
