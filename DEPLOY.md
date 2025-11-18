@@ -146,36 +146,38 @@ EOF
 # 拉取镜像
 docker pull sesiting/llms:latest
 
-# 使用 .env 文件启动（使用 latest 标签）
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
+# 使用 zshrc 环境变量启动
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY sesiting/llms:latest
 
 # 或使用 Harbor 镜像
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY harbor.blacklake.tech/ai/llms:latest
 
-# 使用指定版本（推荐生产环境）
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:1.0.2
+# 使用指定版本
+docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY sesiting/llms:1.0.2
 ```
 
 **生产部署**（使用 .env 文件）：
 
 ```bash
 # 拉取镜像
-docker pull sesiting/llms:latest
+docker pull harbor.blacklake.tech/ai/llms:latest
 
 # 默认配置（openrouter）
-docker run -d --name llms -p 3009:3000 --env-file .env sesiting/llms:latest
+docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
 
 # OpenAI 配置
-docker run -d --name llms-openai -p 3011:3000 --env-file .env -e LLMS_CONFIG_PROFILE=openai sesiting/llms:latest
+docker run -d --name llms-openai -p 3011:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=openai harbor.blacklake.tech/ai/llms:latest
 
-# Harbor 镜像
-docker run -d --name llms -p 3009:3000 --env-file .env harbor.blacklake.tech/ai/llms:latest
+# Debug 模式启动（查看详细日志）
+docker run -d --name llms-debug -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
 ```
 
 **说明**：
 - 本地测试：`-e OPENROUTER_API_KEY` 继承 zshrc 中的环境变量
 - 生产部署：`--env-file .env` 从文件加载环境变量
 - `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 openrouter）
+- `-e LOG_LEVEL=debug` 可选，设置日志级别（`debug`、`info`、`warn`、`error`）
+- `-e NODE_ENV=development` 可选，启用美化日志输出（仅开发环境）
 - 模型选择可通过系统界面动态切换
 
 ### 查看状态
@@ -184,14 +186,14 @@ docker run -d --name llms -p 3009:3000 --env-file .env harbor.blacklake.tech/ai/
 # 查看日志
 docker logs -f llms
 
-# 只看请求输入（精确匹配）
+# 查看请求执行和完成日志（推荐）
+docker logs -f llms 2>&1 | grep -E '\[ROUTE\]'
+
+# 只看请求输入
 docker logs -f llms 2>&1 | grep '"type":"request body"'
 
 # 只看实际发送到 API 的请求（包含目标模型和 URL）
 docker logs -f llms 2>&1 | grep '"msg":"final request"'
-
-# 同时看输入和发送的请求
-docker logs -f llms 2>&1 | grep -E '"type":"request body"|"msg":"final request"'
 
 # 测试服务
 curl http://localhost:3009/health
@@ -214,6 +216,18 @@ npm start
 
 # 或使用 nodemon 开发
 npm run dev
+
+# Debug 模式启动（查看详细日志）
+# 方式 1：临时设置环境变量
+LOG_LEVEL=debug npm run dev
+
+# 方式 2：开发模式 + Debug（美化输出）
+NODE_ENV=development LOG_LEVEL=debug npm run dev
+
+# 方式 3：使用环境变量文件
+export LOG_LEVEL=debug
+export NODE_ENV=development  # 可选，启用美化输出
+npm run dev
 ```
 
 ## 环境变量
@@ -224,6 +238,8 @@ npm run dev
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
 | `LLMS_CONFIG_PROFILE` | `openrouter` | 配置文件选择器（`openrouter` 或 `openai`） |
+| `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
+| `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
 
 ## 端口说明
 

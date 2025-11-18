@@ -55,3 +55,19 @@ export function sendUnifiedRequest(
   );
   return fetch(typeof url === "string" ? url : url.toString(), fetchOptions);
 }
+
+// 提取用户提问摘要
+export function extractUserQuery(messages: any[]): string {
+  if (!messages || !Array.isArray(messages)) return '';
+  const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+  if (!lastUserMsg) return '';
+  const content = lastUserMsg.content;
+  if (typeof content === 'string') {
+    return content.length > 100 ? content.substring(0, 100) + '...' : content;
+  }
+  if (Array.isArray(content)) {
+    const text = content.find(c => c.type === 'text')?.text || '';
+    return text.length > 100 ? text.substring(0, 100) + '...' : text;
+  }
+  return '';
+}

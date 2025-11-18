@@ -5,7 +5,7 @@ import {
   FastifyReply,
 } from "fastify";
 import { RegisterProviderRequest, LLMProvider } from "@/types/llm";
-import { sendUnifiedRequest } from "@/utils/request";
+import { sendUnifiedRequest, extractUserQuery } from "@/utils/request";
 import { createApiError } from "./middleware";
 import { version } from "../../package.json";
 
@@ -22,6 +22,16 @@ async function handleTransformerEndpoint(
   const body = req.body as any;
   const providerName = req.provider!;
   const provider = fastify._server!.providerService.getProvider(providerName);
+  
+  // 记录初始请求信息
+  const originalModel = (req as any)._originalModel || body.model;
+  const initialUserQuery = extractUserQuery(body.messages);
+  fastify.log.info({
+    reqId: req.id,
+    originalModel,
+    provider: providerName,
+    userQuery: initialUserQuery,
+  }, '[ROUTE] 📥 RECEIVED - 接收请求');
 
   // 验证提供者是否存在
   if (!provider) {
@@ -67,6 +77,19 @@ async function handleTransformerEndpoint(
       req,
     }
   );
+
+  // 在返回响应前记录耗时
+  const startTime = (req as any)._startTime || Date.now();
+  const duration = Date.now() - startTime;
+  const finalModel = requestBody?.model || body.model;
+  const userQuery = extractUserQuery(body.messages);
+  fastify.log.info({
+    reqId: req.id,
+    finalModel,
+    provider: req.provider,
+    duration: `${duration}ms`,
+    userQuery,
+  }, '[ROUTE] ✅ COMPLETED - 请求完成');
 
   // 格式化并返回响应
   return formatResponse(finalResponse, reply, body);
@@ -210,6 +233,16 @@ async function sendRequestToProvider(
       requestBody = auth;
     }
   }
+
+  // 添加执行日志
+  const originalModel = (context.req as any)._originalModel;
+  fastify.log.info({
+    reqId: context.req.id,
+    originalModel: originalModel || requestBody.model,
+    finalModel: requestBody.model,
+    provider: provider.name,
+    url: url.toString(),
+  }, '[ROUTE] 🚀 EXECUTING - 执行请求');
 
   // 发送HTTP请求
   // 准备headers
