@@ -42,19 +42,14 @@ echo "当前版本: $VERSION"
 # 1. 登录
 docker login
 
-# 2. 从 Dockerfile 读取版本号
-export VERSION=$(grep -E '^ARG VERSION=' Dockerfile | sed 's/ARG VERSION=//' | tr -d ' ')
-echo "当前版本: $VERSION"
-
-# 3. 本地构建（同时打两个标签）
+# 2. 本地构建（同时打两个标签，${VERSION} 需先执行上方"版本管理说明"中的命令）
 docker build -t sesiting/llms:${VERSION} -t sesiting/llms:latest .
 
-# 4. 本地测试
+# 3. 本地测试
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
 
-# 5. 确认无误后推送
-docker push sesiting/llms:${VERSION}
-docker push sesiting/llms:latest
+# 4. 确认无误后推送
+docker push sesiting/llms:${VERSION} && docker push sesiting/llms:latest
 ```
 
 ### 方式二：Harbor（Linux 版本）
@@ -68,21 +63,11 @@ docker buildx create --use --name multi-builder
 # 登录
 docker login harbor.blacklake.tech
 
-# 从 Dockerfile 读取版本号
-export VERSION=$(grep -E '^ARG VERSION=' Dockerfile | sed 's/ARG VERSION=//' | tr -d ' ')
-echo "当前版本: $VERSION"
-
-# 构建 Linux 平台镜像（同时打两个标签）
-docker buildx build \
-  --platform linux/amd64 \
-  -t harbor.blacklake.tech/ai/llms:${VERSION} \
-  -t harbor.blacklake.tech/ai/llms:latest \
-  --load \
-  .
+# 构建 Linux 平台镜像（同时打两个标签，${VERSION} 需先执行上方"版本管理说明"中的命令）
+docker buildx build --platform linux/amd64 -t harbor.blacklake.tech/ai/llms:${VERSION} -t harbor.blacklake.tech/ai/llms:latest --load .
 
 # 推送
-docker push harbor.blacklake.tech/ai/llms:${VERSION}
-docker push harbor.blacklake.tech/ai/llms:latest
+docker push harbor.blacklake.tech/ai/llms:${VERSION} && docker push harbor.blacklake.tech/ai/llms:latest
 ```
 
 ### 拉取镜像
@@ -120,11 +105,7 @@ source ~/.zshrc
 echo "OPENROUTER_API_KEY=your-key" > .env
 
 # 或多行配置
-cat > .env << EOF
-OPENROUTER_API_KEY=your-key
-PORT=3000
-HOST=0.0.0.0
-EOF
+echo -e "OPENROUTER_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
 ```
 
 ### 配置选择
