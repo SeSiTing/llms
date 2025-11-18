@@ -39,10 +39,10 @@ const loadConfigFile = (configPath: string): StartupConfig => {
  * 读取配置文件
  * 
  * 使用环境变量 LLMS_CONFIG_PROFILE 指定的配置文件
- * 如果未设置，使用默认值 openrouter
+ * 如果未设置，使用默认值 default
  */
 export const loadConfig = (): StartupConfig | null => {
-  const profile = process.env.LLMS_CONFIG_PROFILE || 'openrouter';
+  const profile = process.env.LLMS_CONFIG_PROFILE || 'default';
   const profileConfigPath = join(
     process.cwd(),
     CONFIG_SHORTCUTS.DIR,

@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 # 构建参数
-ARG VERSION=1.0.3
+ARG VERSION=1.0.4
 
 # 镜像元数据
 LABEL org.opencontainers.image.title="LLMs" \
@@ -26,7 +26,7 @@ RUN npm run build
 EXPOSE 3000
 
 # 设置默认配置环境变量
-ENV LLMS_CONFIG_PROFILE=openrouter
+ENV LLMS_CONFIG_PROFILE=default
 
 # 启动服务
 CMD ["npm", "start"]
