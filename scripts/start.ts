@@ -47,6 +47,9 @@ async function start() {
     
     // 添加路由中间件（在服务器启动前）
     server.addHook('preHandler', async (req: any, reply: any) => {
+      // 记录请求开始时间
+      (req as any)._startTime = Date.now();
+      
       // 跳过非POST请求和API端点
       if (req.method !== 'POST' || 
           req.url.startsWith(API_ENDPOINTS.API_PREFIX) || 
@@ -65,6 +68,14 @@ async function start() {
           ? getDefaultModel(config)
           : SERVER_DEFAULTS.DEFAULT_MODEL;
         req.log.info({ original: body.model, routed: defaultModel }, '🔄 使用默认模型');
+        const originalModel = body.model;
+        req.log.info({
+          reqId: req.id,
+          originalModel,
+          routedModel: defaultModel,
+          reason: '使用默认模型',
+        }, '[ROUTE] 🔄 ROUTED - 模型路由');
+        (req as any)._originalModel = originalModel;
         body.model = defaultModel;
       }
     });
