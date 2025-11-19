@@ -93,6 +93,7 @@ docker pull harbor.blacklake.tech/ai/llms:${VERSION}
 ```bash
 # 添加到 ~/.zshrc
 export OPENROUTER_API_KEY=your-key
+export OPENAI_API_KEY=your-key
 
 # 使配置生效
 source ~/.zshrc
@@ -103,9 +104,10 @@ source ~/.zshrc
 ```bash
 # 创建 .env 文件
 echo "OPENROUTER_API_KEY=your-key" > .env
+echo "OPENAI_API_KEY=your-key" >> .env
 
 # 或多行配置
-echo -e "OPENROUTER_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
+echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
 ```
 
 ### 配置选择
@@ -127,13 +129,13 @@ echo -e "OPENROUTER_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
 docker pull sesiting/llms:latest
 
 # 使用 zshrc 环境变量启动
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY sesiting/llms:latest
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY sesiting/llms:latest
 
 # 或使用 Harbor 镜像
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY harbor.blacklake.tech/ai/llms:latest
 
 # 使用指定版本
-docker run -d --name llms-$(date +%Y%m%d) -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY sesiting/llms:1.0.2
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY sesiting/llms:1.0.2
 ```
 
 **生产部署**（使用 .env 文件）：
@@ -146,11 +148,11 @@ docker pull harbor.blacklake.tech/ai/llms:latest
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
 
 # Debug 模式启动（查看详细日志）
-docker run -d --name llms-debug -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
 ```
 
 **说明**：
-- 本地测试：`-e OPENROUTER_API_KEY` 继承 zshrc 中的环境变量
+- 本地测试：`-e OPENROUTER_API_KEY -e OPENAI_API_KEY` 继承 zshrc 中的环境变量
 - 生产部署：`--env-file .env` 从文件加载环境变量
 - `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 default）
 - `-e LOG_LEVEL=debug` 可选，设置日志级别（`debug`、`info`、`warn`、`error`）
@@ -180,19 +182,19 @@ docker ps | grep llms
 
 # 诊断命令（排查启动失败问题）
 # 查看完整日志（包括启动错误，注意替换容器名）
-docker logs llms-debug 2>&1
+docker logs llms 2>&1
 
 # 查看最近 100 行日志
-docker logs --tail 100 llms-debug
+docker logs --tail 100 llms
 
 # 查看错误日志
-docker logs llms-debug 2>&1 | grep -i error
+docker logs llms 2>&1 | grep -i error
 
 # 查看容器退出状态（如果容器已停止）
 docker ps -a | grep llms
 
 # 查看容器退出代码
-docker inspect llms-debug --format='{{.State.ExitCode}}'
+docker inspect llms --format='{{.State.ExitCode}}'
 ```
 
 ## 本地开发构建
@@ -230,6 +232,7 @@ npm run dev
 | `PORT` | 3000 | 服务端口 |
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
+| `OPENAI_API_KEY` | - | OpenAI API 密钥（可选，default 配置需要） |
 | `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（默认 `default`，包含 OpenAI 和 OpenRouter） |
 | `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
 | `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
