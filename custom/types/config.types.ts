@@ -31,6 +31,22 @@ export interface ConfigProvider {
 }
 
 /**
+ * 模型路由规则
+ * 
+ * 用于将原始模型名称转换为目标模型名称
+ */
+export interface ModelRouteRule {
+  /** 匹配模式（正则表达式字符串） */
+  pattern: string;
+  /** 目标模型名称（支持占位符，如 $1 表示第一个捕获组） */
+  targetModel: string;
+  /** 可选的 provider 名称，如果不提供则使用默认 provider */
+  provider?: string;
+  /** 规则描述（用于日志和调试） */
+  description?: string;
+}
+
+/**
  * 路由配置
  * 
  * 简化设计：统一使用默认模型
@@ -38,6 +54,8 @@ export interface ConfigProvider {
 export interface RouterConfig {
   /** 默认模型（格式: "provider,model"） */
   default: string;
+  /** 可选的模型路由规则列表 */
+  rules?: ModelRouteRule[];
 }
 
 /**

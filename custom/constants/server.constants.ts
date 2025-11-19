@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { homedir } from 'os';
+import type { ModelRouteRule } from '../types/config.types.js';
 
 /**
  * 服务器默认配置
@@ -49,4 +50,41 @@ export const API_ENDPOINTS = {
   /** API 路由前缀 */
   API_PREFIX: '/api',
 } as const;
+
+/**
+ * 默认模型路由规则
+ * 
+ * 按优先级顺序排列，第一个匹配的规则将被使用
+ * 这些规则可以通过配置文件中的 Router.rules 进行覆盖或扩展
+ */
+export const DEFAULT_ROUTE_RULES: readonly ModelRouteRule[] = [
+  // Claude Haiku 模型
+  {
+    pattern: "claude-haiku|haiku",
+    targetModel: "anthropic/claude-haiku-4.5",
+    provider: "openrouter",
+    description: "识别 Claude Haiku 模型",
+  },
+  // Claude Sonnet 模型
+  {
+    pattern: "claude-sonnet|sonnet",
+    targetModel: "anthropic/claude-sonnet-4.5",
+    provider: "openrouter",
+    description: "识别 Claude Sonnet 模型",
+  },
+  // Claude Opus 模型
+  {
+    pattern: "claude-opus|opus",
+    targetModel: "anthropic/claude-opus-4.1",
+    provider: "openrouter",
+    description: "识别 Claude Opus 模型",
+  },
+  // GPT 5.1 模型（直接使用，不转换）
+  {
+    pattern: "gpt-5\\.1", // 匹配包含 gpt-5.1 的模型
+    targetModel: "$0", // $0 将被替换为原始模型名称（通过特殊处理）
+    provider: "openai",
+    description: "识别 GPT 5.1 模型",
+  },
+] as const;
 

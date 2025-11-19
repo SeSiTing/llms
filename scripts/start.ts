@@ -10,6 +10,7 @@ import {
 } from "../custom/constants/server.constants.js";
 import { loadConfig } from "../custom/services/config-loader.js";
 import { logger } from "../custom/services/logger.js";
+import { ModelRouter } from "../custom/services/model-router.js";
 
 
 
@@ -23,41 +24,15 @@ const getDefaultModel = (config: StartupConfig): string => {
 };
 
 /**
- * 识别Claude模型名称模式并转换为支持的模型
+ * 从默认模型字符串中提取 provider 名称
  * 
- * 支持的识别模式：
- * - claude-haiku-*-* → anthropic/claude-haiku-4.5
- * - claude-sonnet-*-* → anthropic/claude-sonnet-4.5
- * - claude-opus-*-* → anthropic/claude-opus-4.1
- * 
- * @param modelName 原始模型名称
- * @param provider 提供商配置（用于获取provider名称）
- * @returns 转换后的模型名称（格式: provider,model），如果无法识别则返回null
+ * @param defaultModel 默认模型（格式: "provider,model"）
+ * @returns provider 名称，如果格式不正确则返回 undefined
  */
-function recognizeClaudeModel(modelName: string, provider: ConfigProvider): string | null {
-  if (!modelName || typeof modelName !== 'string') {
-    return null;
-  }
-  
-  const lowerModel = modelName.toLowerCase();
-  
-  // 识别haiku模式: claude-haiku-*-*
-  if (lowerModel.includes('claude-haiku') || lowerModel.includes('haiku')) {
-    return `${provider.name},anthropic/claude-haiku-4.5`;
-  }
-  
-  // 识别sonnet模式: claude-sonnet-*-*
-  if (lowerModel.includes('claude-sonnet') || lowerModel.includes('sonnet')) {
-    return `${provider.name},anthropic/claude-sonnet-4.5`;
-  }
-  
-  // 识别opus模式: claude-opus-*-*
-  if (lowerModel.includes('claude-opus') || lowerModel.includes('opus')) {
-    return `${provider.name},anthropic/claude-opus-4.1`;
-  }
-  
-  return null;
-}
+const extractDefaultProvider = (defaultModel: string): string | undefined => {
+  const parts = defaultModel.split(",");
+  return parts.length >= 2 ? parts[0] : undefined;
+};
 
 /**
  * 主启动函数
@@ -82,6 +57,11 @@ async function start() {
       }
     });
     
+    // 创建模型路由器
+    const defaultModel = getDefaultModel(config);
+    const defaultProvider = extractDefaultProvider(defaultModel);
+    const modelRouter = new ModelRouter(config.Router?.rules);
+    
     // 添加路由中间件（在服务器启动前）
     server.addHook('preHandler', async (req: any, reply: any) => {
       // 记录请求开始时间
@@ -105,21 +85,16 @@ async function start() {
         let routedModel: string | null = null;
         let reason = '';
         
-        // 先尝试智能识别Claude模型
-        if (config && config.providers && config.providers.length > 0) {
-          // 使用第一个provider进行识别（通常只有一个）
-          const provider = config.providers[0];
-          routedModel = recognizeClaudeModel(originalModel, provider);
-          if (routedModel) {
-            reason = '智能识别Claude模型';
-          }
+        // 使用模型路由器进行智能识别
+        const routeResult = modelRouter.routeModel(originalModel, defaultProvider);
+        if (routeResult) {
+          routedModel = routeResult.model;
+          reason = routeResult.ruleDescription || '智能识别模型';
         }
         
         // 如果识别失败，使用默认模型
         if (!routedModel) {
-          routedModel = config && config.Router 
-            ? getDefaultModel(config)
-            : SERVER_DEFAULTS.DEFAULT_MODEL;
+          routedModel = defaultModel;
           reason = '使用默认模型';
         }
         
