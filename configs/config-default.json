@@ -62,28 +62,7 @@
         "openai/gpt-5-image"
       ],
       "transformer": {
-        "use": ["openrouter"],
-        "openai/gpt-5": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5-pro": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5.1": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5.1-chat": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5.1-codex": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5-image": {
-          "use": ["openrouter", "openai-responses"]
-        },
-        "openai/gpt-5-mini": {
-          "use": ["openrouter", "openai-responses"]
-        }
+        "use": ["openrouter"]
       }
     }
   ],
