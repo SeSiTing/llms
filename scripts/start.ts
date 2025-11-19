@@ -128,7 +128,7 @@ async function start() {
         logger.info({ msg: `🤖 模型数量: ${provider.models?.length || 0}` });
         if (provider.models?.length > 0) {
           logger.info({ 
-            msg: `模型列表: ${provider.models.slice(0, 3).join(', ')}${provider.models.length > 3 ? '...' : ''}` 
+            msg: `模型列表: ${provider.models.join(', ')}` 
           });
         }
       }

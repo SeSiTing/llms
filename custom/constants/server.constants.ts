@@ -79,12 +79,5 @@ export const DEFAULT_ROUTE_RULES: readonly ModelRouteRule[] = [
     provider: "openrouter",
     description: "识别 Claude Opus 模型",
   },
-  // GPT 5.1 模型（直接使用，不转换）
-  {
-    pattern: "gpt-5\\.1", // 匹配包含 gpt-5.1 的模型
-    targetModel: "$0", // $0 将被替换为原始模型名称（通过特殊处理）
-    provider: "openai",
-    description: "识别 GPT 5.1 模型",
-  },
 ] as const;
 

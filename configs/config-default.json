@@ -52,6 +52,7 @@
         "anthropic/claude-opus-4.1",
         "google/gemini-2.5-flash",
         "google/gemini-2.5-pro",
+        "google/gemini-3-pro-preview",
         "minimax/minimax-m2",
         "openai/gpt-5",
         "openai/gpt-5-pro",
