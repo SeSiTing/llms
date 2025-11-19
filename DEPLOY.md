@@ -223,6 +223,37 @@ NODE_ENV=development LOG_LEVEL=debug npm run dev
 export LOG_LEVEL=debug
 export NODE_ENV=development  # 可选，启用美化输出
 npm run dev
+
+# 方式 4：Debug 模式启动并过滤关键日志（推荐开发调试）
+# 过滤 [ROUTE]、请求体、最终请求信息
+LOG_LEVEL=debug npm run dev 2>&1 | grep -E '\[ROUTE\]|"msg":"final request"|"type":"request body"'
+
+# 方式 5：开发模式 + Debug + 过滤关键日志（美化输出）
+# 过滤 [ROUTE]、请求体、最终请求信息
+NODE_ENV=development LOG_LEVEL=debug npm run dev 2>&1 | grep -E '\[ROUTE\]|"msg":"final request"|"type":"request body"'
+```
+
+### 本地开发日志查看
+
+```bash
+# 查看所有日志（如果使用方式 4 或 5 启动，则已自动过滤）
+# 如果直接启动，可以使用以下命令过滤：
+
+# 查看关键日志（推荐）：[ROUTE]、请求体、最终请求信息
+npm run dev 2>&1 | grep -E '\[ROUTE\]|"msg":"final request"|"type":"request body"'
+
+# Debug 模式 + 过滤关键日志
+LOG_LEVEL=debug npm run dev 2>&1 | grep -E '\[ROUTE\]|"msg":"final request"|"type":"request body"'
+
+# 单独查看各类日志（可选）
+# 查看请求执行和完成日志
+npm run dev 2>&1 | grep -E '\[ROUTE\]'
+
+# 只看请求输入
+npm run dev 2>&1 | grep '"type":"request body"'
+
+# 只看实际发送到 API 的请求（包含目标模型和 URL）
+npm run dev 2>&1 | grep '"msg":"final request"'
 ```
 
 ## 环境变量
