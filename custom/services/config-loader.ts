@@ -7,12 +7,15 @@ import { logger } from "./logger.js";
 /**
  * 环境变量插值函数
  * 
- * 支持 ${VAR_NAME} 格式
+ * 支持格式:
+ * - ${VAR_NAME}: 使用环境变量值,不存在则保留原字符串
+ * - ${VAR_NAME:-default}: 使用环境变量值,不存在则使用默认值
  */
 const interpolateEnvVars = (obj: unknown): unknown => {
   if (typeof obj === "string") {
     return obj.replace(/\$\{([^}]+)\}/g, (match, varName) => {
-      return process.env[varName] || match;
+      const [name, defaultValue] = varName.split(':-');
+      return process.env[name] || defaultValue || match;
     });
   } else if (Array.isArray(obj)) {
     return obj.map(interpolateEnvVars);
