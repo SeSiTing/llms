@@ -105,6 +105,8 @@ source ~/.zshrc
 # 创建 .env 文件
 echo "OPENROUTER_API_KEY=your-key" > .env
 echo "OPENAI_API_KEY=your-key" >> .env
+echo "OPENROUTER_BASE_URL=https://openrouter-proxy.blacklake.cn/api/v1/chat/completions" >> .env
+
 
 # 或多行配置
 echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
