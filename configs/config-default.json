@@ -42,7 +42,7 @@
       "id": "openrouter",
       "name": "openrouter",
       "type": "openai",
-      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_base_url": "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1/chat/completions}",
       "api_key": "${OPENROUTER_API_KEY}",
       "models": [
         "x-ai/grok-code-fast-1",

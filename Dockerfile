@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 # 构建参数
-ARG VERSION=1.0.6
+ARG VERSION=1.0.7
 
 # 镜像元数据
 LABEL org.opencontainers.image.title="LLMs" \
