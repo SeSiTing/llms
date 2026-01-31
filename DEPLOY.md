@@ -106,7 +106,8 @@ source ~/.zshrc
 echo "OPENROUTER_API_KEY=your-key" > .env
 echo "OPENAI_API_KEY=your-key" >> .env
 echo "OPENROUTER_BASE_URL=https://openrouter-proxy.blacklake.cn/api/v1/chat/completions" >> .env
-
+echo "ZHIPU_API_KEY=your-key" >> .env
+echo "MINIMAX_API_KEY=your-key" >> .env
 
 # 或多行配置
 echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
@@ -114,13 +115,13 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 
 ### 配置选择
 
-服务支持通过环境变量 `LLMS_CONFIG_PROFILE` 选择不同的配置文件：
+服务支持通过环境变量 `LLMS_CONFIG_PROFILE` 选择配置文件：
 
-- **默认值**: `default`（如果未设置，使用此默认值）
-- **可用配置**:
-  - `default` - 通用配置，同时包含 OpenAI 和 OpenRouter 两个 provider，支持多种模型（GPT、Claude、Gemini、Grok 等）
+- **default**: OpenRouter Claude（默认）
+- **minimax**: 将 haiku/sonnet/opus 映射到 MiniMax-M2.1
+- **glm**: 将 haiku/sonnet/opus 映射到 GLM-4.7
 
-配置文件位于 `configs/config-${profile}.json`。模型可通过系统界面动态选择。
+配置文件位于 `configs/config-${profile}.json`。
 
 ### 启动服务
 
@@ -148,6 +149,12 @@ docker pull harbor.blacklake.tech/ai/llms:latest
 
 # 默认配置（default，包含 OpenAI 和 OpenRouter）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
+
+# MiniMax 配置（端口 3001）
+docker run -d --name llms-minimax -p 3001:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest
+
+# GLM 配置（端口 3002）
+docker run -d --name llms-glm -p 3002:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=glm harbor.blacklake.tech/ai/llms:latest
 
 # Debug 模式启动（查看详细日志）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
@@ -266,7 +273,9 @@ npm run dev 2>&1 | grep '"msg":"final request"'
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
 | `OPENAI_API_KEY` | - | OpenAI API 密钥（可选，default 配置需要） |
-| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（默认 `default`，包含 OpenAI 和 OpenRouter） |
+| `ZHIPU_API_KEY` | - | 智谱 GLM API 密钥（使用 glm 配置时必需） |
+| `MINIMAX_API_KEY` | - | MiniMax API 密钥（使用 minimax 配置时必需） |
+| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（default / minimax / glm） |
 | `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
 | `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
 

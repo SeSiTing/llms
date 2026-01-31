@@ -96,7 +96,26 @@
     }
   ],
   "Router": {
-    "default": "openrouter,anthropic/claude-sonnet-4.5"
+    "default": "zhipu-glm,glm-4.7",
+    "rules": [
+      {
+        "pattern": "claude-haiku|haiku",
+        "targetModel": "glm-4.7",
+        "provider": "zhipu-glm",
+        "description": "Haiku 映射到 GLM-4.7"
+      },
+      {
+        "pattern": "claude-sonnet|sonnet",
+        "targetModel": "glm-4.7",
+        "provider": "zhipu-glm",
+        "description": "Sonnet 映射到 GLM-4.7"
+      },
+      {
+        "pattern": "claude-opus|opus",
+        "targetModel": "glm-4.7",
+        "provider": "zhipu-glm",
+        "description": "Opus 映射到 GLM-4.7"
+      }
+    ]
   }
 }
-

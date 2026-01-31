@@ -96,7 +96,26 @@
     }
   ],
   "Router": {
-    "default": "openrouter,anthropic/claude-sonnet-4.5"
+    "default": "minimax,MiniMax-M2.1",
+    "rules": [
+      {
+        "pattern": "claude-haiku|haiku",
+        "targetModel": "MiniMax-M2.1",
+        "provider": "minimax",
+        "description": "Haiku 映射到 MiniMax 标准版"
+      },
+      {
+        "pattern": "claude-sonnet|sonnet",
+        "targetModel": "MiniMax-M2.1",
+        "provider": "minimax",
+        "description": "Sonnet 映射到 MiniMax 标准版"
+      },
+      {
+        "pattern": "claude-opus|opus",
+        "targetModel": "MiniMax-M2.1",
+        "provider": "minimax",
+        "description": "Opus 映射到 MiniMax 标准版"
+      }
+    ]
   }
 }
-

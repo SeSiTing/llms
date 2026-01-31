@@ -267,6 +267,7 @@ async function sendRequestToProvider(
     requestBody,
     {
       httpsProxy: fastify._server!.configService.getHttpsProxy(),
+      TIMEOUT: provider.timeout,
       ...config,
       headers: JSON.parse(JSON.stringify(requestHeaders)),
     },

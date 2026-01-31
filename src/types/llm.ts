@@ -201,6 +201,7 @@ export interface LLMProvider {
   baseUrl: string;
   apiKey: string;
   models: string[];
+  timeout?: number;
   transformer?: {
     [key: string]: {
       use?: Transformer[];
@@ -229,6 +230,7 @@ export interface ConfigProvider {
   api_base_url: string;
   api_key: string;
   models: string[];
+  timeout?: number;
   transformer: {
     use?: string[] | Array<any>[];
   } & {
