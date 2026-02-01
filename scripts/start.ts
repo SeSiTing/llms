@@ -62,6 +62,34 @@ async function start() {
     const defaultProvider = extractDefaultProvider(defaultModel);
     const modelRouter = new ModelRouter(config.Router?.rules);
     
+    // 静默处理已废弃的端点（避免日志污染，但保留整点提醒）
+    server.addHook('preHandler', async (req: any, reply: any) => {
+      const DEPRECATED_ENDPOINTS = [
+        '/api/event_logging/batch',
+      ];
+      
+      if (DEPRECATED_ENDPOINTS.includes(req.url)) {
+        // 每小时整点打印一次日志（分钟数为 0）
+        const now = new Date();
+        const shouldLog = now.getMinutes() === 0;
+        
+        if (shouldLog) {
+          req.log.warn({
+            url: req.url,
+            method: req.method,
+            remoteAddress: req.ip,
+            hour: now.getHours(),
+          }, '⚠️ 废弃端点仍在被调用（每小时提醒一次）');
+        }
+        
+        return reply.code(410).send({
+          error: 'Gone',
+          message: 'This endpoint has been deprecated and removed',
+          deprecatedSince: '2026-01-01'
+        });
+      }
+    });
+    
     // 添加路由中间件（在服务器启动前）
     server.addHook('preHandler', async (req: any, reply: any) => {
       // 记录请求开始时间
