@@ -89,9 +89,9 @@ LLMS_CONFIG_PROFILE=minimax PORT=3001 npm start
 # All haiku/sonnet/opus requests will be routed to MiniMax
 ```
 
-**Option 3: Use GLM as Default**
+**Option 3: Use Zhipu as Default**
 ```sh
-LLMS_CONFIG_PROFILE=glm PORT=3002 npm start
+LLMS_CONFIG_PROFILE=zhipu PORT=3002 npm start
 # All haiku/sonnet/opus requests will be routed to GLM-4.7
 ```
 
@@ -100,8 +100,8 @@ LLMS_CONFIG_PROFILE=glm PORT=3002 npm start
 # Terminal 1: MiniMax service
 LLMS_CONFIG_PROFILE=minimax PORT=3001 npm start
 
-# Terminal 2: GLM service
-LLMS_CONFIG_PROFILE=glm PORT=3002 npm start
+# Terminal 2: Zhipu service
+LLMS_CONFIG_PROFILE=zhipu PORT=3002 npm start
 
 # Terminal 3: Default Claude service
 npm start
@@ -109,14 +109,14 @@ npm start
 
 ### Model Routing
 
-When using `config-minimax.json` or `config-glm.json`, Claude model names are automatically mapped:
+When using `config-minimax.json` or `config-zhipu.json`, Claude model names are automatically mapped:
 
 **MiniMax Mapping:**
 - `claude-haiku` / `haiku` → `MiniMax-M2.1`
 - `claude-sonnet` / `sonnet` → `MiniMax-M2.1`
 - `claude-opus` / `opus` → `MiniMax-M2.1`
 
-**GLM Mapping:**
+**Zhipu Mapping:**
 - `claude-haiku` / `haiku` → `glm-4.7`
 - `claude-sonnet` / `sonnet` → `glm-4.7`
 - `claude-opus` / `opus` → `glm-4.7`
@@ -168,7 +168,7 @@ const response = await fetch('http://localhost:3001/v1/messages', {
 
 - `configs/config-default.json` - Default configuration (OpenRouter Claude)
 - `configs/config-minimax.json` - MiniMax as default provider
-- `configs/config-glm.json` - GLM as default provider
+- `configs/config-zhipu.json` - Zhipu as default provider
 - `.env` - Environment variables (API keys, etc.)
 
 ## Pricing Reference

@@ -7,13 +7,15 @@ import { LLMProvider } from "@/types/llm";
  * 适用于已经兼容 Anthropic API 格式的服务(如智谱 GLM、MiniMax)
  * 
  * 工作原理:
- * 1. 不实现 transformRequestOut/In - 请求原样透传
- * 2. 仅实现 auth 方法 - 添加必要的认证头
- * 3. 触发 bypass 模式 - 跳过所有转换器链
+ * 1. 不设置 endPoint - 通过 provider 配置动态选择
+ * 2. 不实现 transformRequestOut/In - 请求原样透传
+ * 3. 仅实现 auth 方法 - 添加必要的认证头
+ * 4. 通过 bypass 模式跳过所有转换器链
  */
 export class PassthroughTransformer implements Transformer {
   name = "passthrough";
-  endPoint = "/v1/messages";  // Anthropic 标准端点
+  // 不设置 endPoint - passthrough 通过 provider 的 transformer 配置动态选择
+  // 它会复用其他 transformer 的路由(如 anthropic 的 /v1/messages)
   logger?: any;
 
   /**

@@ -69,7 +69,7 @@
     {
       "id": "zhipu-glm",
       "name": "zhipu-glm",
-      "type": "passthrough",
+      "type": "anthropic",
       "api_base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/anthropic/v1/messages}",
       "api_key": "${ZHIPU_API_KEY}",
       "models": [
@@ -82,7 +82,7 @@
     {
       "id": "minimax",
       "name": "minimax",
-      "type": "passthrough",
+      "type": "anthropic",
       "api_base_url": "${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic/v1/messages}",
       "api_key": "${MINIMAX_API_KEY}",
       "models": [

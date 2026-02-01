@@ -119,7 +119,7 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 
 - **default**: OpenRouter Claude（默认）
 - **minimax**: 将 haiku/sonnet/opus 映射到 MiniMax-M2.1
-- **glm**: 将 haiku/sonnet/opus 映射到 GLM-4.7
+- **zhipu**: 将 haiku/sonnet/opus 映射到 GLM-4.7
 
 配置文件位于 `configs/config-${profile}.json`。
 
@@ -132,13 +132,7 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 docker pull sesiting/llms:latest
 
 # 使用 zshrc 环境变量启动
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY sesiting/llms:latest
-
-# 或使用 Harbor 镜像
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY harbor.blacklake.tech/ai/llms:latest
-
-# 使用指定版本
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY sesiting/llms:1.0.2
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
 ```
 
 **生产部署**（使用 .env 文件）：
@@ -153,8 +147,8 @@ docker run -d --name llms-default -p 3010:3000 --restart unless-stopped --env-fi
 # MiniMax 配置（端口 3009）
 docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest
 
-# GLM 配置（端口 3008）
-docker run -d --name llms-glm -p 3008:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=glm harbor.blacklake.tech/ai/llms:latest
+# Zhipu 配置（端口 3008）
+docker run -d --name llms-zhipu -p 3008:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=zhipu harbor.blacklake.tech/ai/llms:latest
 
 # Debug 模式启动（查看详细日志）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
@@ -273,9 +267,9 @@ npm run dev 2>&1 | grep '"msg":"final request"'
 | `HOST` | 0.0.0.0 | 监听地址 |
 | `OPENROUTER_API_KEY` | - | OpenRouter API 密钥（必需） |
 | `OPENAI_API_KEY` | - | OpenAI API 密钥（可选，default 配置需要） |
-| `ZHIPU_API_KEY` | - | 智谱 GLM API 密钥（使用 glm 配置时必需） |
+| `ZHIPU_API_KEY` | - | 智谱 GLM API 密钥（使用 zhipu 配置时必需） |
 | `MINIMAX_API_KEY` | - | MiniMax API 密钥（使用 minimax 配置时必需） |
-| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（default / minimax / glm） |
+| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（default / minimax / zhipu） |
 | `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
 | `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
 
