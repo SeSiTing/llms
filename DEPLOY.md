@@ -45,8 +45,8 @@ docker login
 # 2. 本地构建（同时打两个标签，${VERSION} 需先执行上方"版本管理说明"中的命令）
 docker build -t sesiting/llms:${VERSION} -t sesiting/llms:latest .
 
-# 3. 本地测试
-docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
+# 3. 本地测试（使用环境变量）
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
 
 # 4. 确认无误后推送
 docker push sesiting/llms:${VERSION} && docker push sesiting/llms:latest
@@ -133,6 +133,11 @@ docker pull sesiting/llms:latest
 
 # 使用 zshrc 环境变量启动
 docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
+
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
+
+# 或使用 .env 文件启动
+docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
 ```
 
 **生产部署**（使用 .env 文件）：
@@ -142,7 +147,7 @@ docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_AP
 docker pull harbor.blacklake.tech/ai/llms:latest
 
 # 默认配置（default，包含 OpenAI 和 OpenRouter，端口 3010）
-docker run -d --name llms-default -p 3010:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=default harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms -p 3010:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=default harbor.blacklake.tech/ai/llms:latest
 
 # MiniMax 配置（端口 3009）
 docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest

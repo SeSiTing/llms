@@ -76,7 +76,7 @@
         "glm-4.7"
       ],
       "transformer": {
-        "use": ["anthropic"]
+        "use": ["passthrough"]
       }
     },
     {
@@ -90,7 +90,7 @@
         "MiniMax-M2.1-lightning"
       ],
       "transformer": {
-        "use": ["anthropic"]
+        "use": ["passthrough"]
       },
       "timeout": 3000000
     }

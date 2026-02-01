@@ -187,20 +187,20 @@ async function processRequestTransformers(
 }
 
 /**
- * 判断是否应该跳过转换器（透传参数）
- * 当provider只使用一个transformer且该transformer与当前transformer相同时，跳过其他转换器
+ * 判断是否应该跳过转换器（透传模式）
+ * 当provider配置了单一的passthrough transformer时，启用透传模式
+ * 透传模式下，请求原样发送给上游API，仅添加认证头
  */
 function shouldBypassTransformers(
   provider: any,
   transformer: any,
   body: any
 ): boolean {
+  // 检查provider是否配置了passthrough transformer
+  // 只要provider.transformer.use包含passthrough，就启用透传
   return (
     provider.transformer?.use?.length === 1 &&
-    provider.transformer.use[0].name === transformer.name &&
-    (!provider.transformer?.[body.model]?.use.length ||
-      (provider.transformer?.[body.model]?.use.length === 1 &&
-        provider.transformer?.[body.model]?.use[0].name === transformer.name))
+    provider.transformer.use[0].name === 'passthrough'
   );
 }
 

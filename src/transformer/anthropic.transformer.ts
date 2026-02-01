@@ -205,7 +205,26 @@ export class AnthropicTransformer implements Transformer {
         result.tool_choice = request.tool_choice.type;
       }
     }
+    // 清理空字段，避免发送空数组给不支持的 API
+    if (!result.tools || result.tools.length === 0) {
+      delete result.tools;
+      delete result.tool_choice;
+    }
+
     return result;
+  }
+
+  async transformRequestIn(
+    request: UnifiedChatRequest
+  ): Promise<Record<string, any>> {
+    // 清理空的 tools 字段，某些 API（如 MiniMax）不支持空数组
+    if (!request.tools || request.tools.length === 0) {
+      const cleaned = { ...request };
+      delete cleaned.tools;
+      delete cleaned.tool_choice;
+      return cleaned;
+    }
+    return request;
   }
 
   async transformResponseIn(
