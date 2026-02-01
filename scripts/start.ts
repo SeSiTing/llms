@@ -142,7 +142,11 @@ async function start() {
       logger.info({ msg: '🔧 提供商配置' });
       
       for (const provider of config.providers) {
-        logger.info({ msg: `📋 ${provider.name} (${provider.type})` });
+        const isPassthrough = provider.type === 'passthrough' || 
+                             provider.transformer?.use?.includes('passthrough');
+        const modeLabel = isPassthrough ? ' [🔄 透传模式]' : '';
+        
+        logger.info({ msg: `📋 ${provider.name} (${provider.type})${modeLabel}` });
         logger.info({ msg: `📍 Base URL: ${provider.api_base_url}` });
         
         // 安全显示 API Key
@@ -157,6 +161,12 @@ async function start() {
         if (provider.models?.length > 0) {
           logger.info({ 
             msg: `模型列表: ${provider.models.join(', ')}` 
+          });
+        }
+        
+        if (isPassthrough) {
+          logger.info({ 
+            msg: `⚡ 透传模式: 请求将原样转发,仅添加认证头` 
           });
         }
       }

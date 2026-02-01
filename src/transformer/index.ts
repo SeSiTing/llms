@@ -18,9 +18,10 @@ import { OpenAITransformer } from "./openai.transformer";
 import { CustomParamsTransformer } from "./customparams.transformer";
 import { VercelTransformer } from "./vercel.transformer";
 import { OpenAIResponsesTransformer } from "./openai.responses.transformer";
-import { ForceReasoningTransformer } from "./forcereasoning.transformer"
+import { ForceReasoningTransformer } from "./forcereasoning.transformer";
 import { VertexOpenaiTransformer } from "./vertex-openai.transformer";
 import { ExtraThinkTagTransformer } from "./extrathinktag.transformer";
+import { PassthroughTransformer } from "./passthrough.transformer";
 
 export default {
   AnthropicTransformer,
@@ -45,5 +46,6 @@ export default {
   OpenAIResponsesTransformer,
   ForceReasoningTransformer,
   ExtraThinkTagTransformer,
-  VertexOpenaiTransformer
+  VertexOpenaiTransformer,
+  PassthroughTransformer
 };

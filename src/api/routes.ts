@@ -114,6 +114,15 @@ async function processRequestTransformers(
   // 检查是否应该跳过转换器（透传参数）
   bypass = shouldBypassTransformers(provider, transformer, body);
 
+  if (bypass && context.req?.log) {
+    // 透传模式 - 统一日志格式
+    context.req.log.info({
+      reqId: context.req.id,
+      mode: 'PASSTHROUGH',
+      transformer: transformer.name,
+    }, '[ROUTE] 🔄 PASSTHROUGH - 透传模式');
+  }
+
   if (bypass) {
     if (headers instanceof Headers) {
       headers.delete("content-length");
@@ -236,13 +245,14 @@ async function sendRequestToProvider(
 
   // 添加执行日志
   const originalModel = (context.req as any)._originalModel;
+  const mode = bypass ? 'PASSTHROUGH' : 'TRANSFORM';
   fastify.log.info({
     reqId: context.req.id,
     originalModel: originalModel || requestBody.model,
     finalModel: requestBody.model,
     provider: provider.name,
-    url: url.toString(),
-  }, '[ROUTE] 🚀 EXECUTING - 执行请求');
+    mode,
+  }, `[ROUTE] 🚀 EXECUTING${bypass ? ' (PASSTHROUGH)' : ''} - 执行请求`);
 
   // 发送HTTP请求
   // 准备headers
