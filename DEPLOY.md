@@ -147,7 +147,7 @@ docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env 
 docker pull harbor.blacklake.tech/ai/llms:latest
 
 # 默认配置（default，包含 OpenAI 和 OpenRouter，端口 3010）
-docker run -d --name llms -p 3010:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=default harbor.blacklake.tech/ai/llms:latest
+docker run -d --name llms -p 3010:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
 
 # MiniMax 配置（端口 3009）
 docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest
@@ -162,9 +162,10 @@ docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env 
 **说明**：
 - 本地测试：`-e OPENROUTER_API_KEY -e OPENAI_API_KEY` 继承 zshrc 中的环境变量
 - 生产部署：`--env-file .env` 从文件加载环境变量
-- `-e LLMS_CONFIG_PROFILE=xxx` 可选，切换配置（默认 default）
-- `-e LOG_LEVEL=debug` 可选，设置日志级别（`debug`、`info`、`warn`、`error`）
-- `-e NODE_ENV=development` 可选，启用美化日志输出（仅开发环境）
+- 默认配置：不指定 `LLMS_CONFIG_PROFILE` 时自动使用 `default` 配置
+- `-e LLMS_CONFIG_PROFILE=xxx`：切换配置（`minimax` 或 `zhipu`）
+- `-e LOG_LEVEL=debug`：设置日志级别（`debug`、`info`、`warn`、`error`）
+- `-e NODE_ENV=development`：启用美化日志输出（仅开发环境）
 - 模型选择可通过系统界面动态切换
 
 ### 查看状态
@@ -293,8 +294,9 @@ npm run dev 2>&1 | grep '"msg":"final request"'
 
 **处理方式**：
 - 请求会在应用层被拦截，返回 HTTP 410 Gone
-- 平时不记录日志，避免日志污染
-- 每小时整点（分钟数为 0）会记录一次 warn 级别日志，便于监控是否还有客户端在调用
+- **完全静默处理**：通过禁用 Fastify 自动日志 + 在 `onRequest` hook 中过滤，确保不产生任何 `incoming request` 或 `request completed` 日志
+- 每小时整点前 10 秒内会记录一次 warn 级别日志，便于监控是否还有客户端在调用
+- 日志过滤在 `scripts/start.ts` 中通过 `disableRequestLogging: true` + 手动日志控制实现
 
 **客户端建议**：
 - 如果您的客户端收到 410 Gone 响应，说明该端点已废弃

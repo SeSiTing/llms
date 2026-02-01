@@ -35,6 +35,31 @@ const extractDefaultProvider = (defaultModel: string): string | undefined => {
 };
 
 /**
+ * 静默处理已废弃的端点（避免日志污染）
+ */
+const DEPRECATED_PATTERNS = [
+  /^\/+api\/event_logging\/batch/,  // 匹配 /api/event_logging/batch 和 //api/event_logging/batch
+];
+
+const isDeprecatedEndpoint = (url: string) => {
+  return DEPRECATED_PATTERNS.some(pattern => pattern.test(url));
+};
+
+// 创建一个空 logger，用于废弃端点
+const createNoopLogger = () => ({
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  debug: () => {},
+  trace: () => {},
+  fatal: () => {},
+  child: function() { return this; },
+  // 添加其他可能被调用的方法
+  level: 'silent' as const,
+  silent: () => {},
+});
+
+/**
  * 主启动函数
  * 
  * 1. 读取配置文件
@@ -54,7 +79,9 @@ async function start() {
         PORT: String(port),
         providers: config.providers,
         Router: config.Router
-      }
+      },
+      // 禁用 Fastify 自动请求日志，我们手动控制
+      disableRequestLogging: true,
     });
     
     // 创建模型路由器
@@ -62,19 +89,16 @@ async function start() {
     const defaultProvider = extractDefaultProvider(defaultModel);
     const modelRouter = new ModelRouter(config.Router?.rules);
     
-    // 静默处理已废弃的端点（避免日志污染，但保留整点提醒）
-    server.addHook('preHandler', async (req: any, reply: any) => {
-      const DEPRECATED_ENDPOINTS = [
-        '/api/event_logging/batch',
-      ];
-      
-      if (DEPRECATED_ENDPOINTS.includes(req.url)) {
-        // 每小时整点打印一次日志（分钟数为 0）
-        const now = new Date();
-        const shouldLog = now.getMinutes() === 0;
+    // 手动实现请求日志（排除废弃端点）
+    server.addHook('onRequest', async (req: any, reply: any) => {
+      if (isDeprecatedEndpoint(req.url)) {
+        // 替换为空 logger，完全静默
+        req.log = createNoopLogger() as any;
         
-        if (shouldLog) {
-          req.log.warn({
+        // 每小时整点打印一次监控日志（分钟数为 0）
+        const now = new Date();
+        if (now.getMinutes() === 0 && now.getSeconds() < 10) {
+          logger.warn({
             url: req.url,
             method: req.method,
             remoteAddress: req.ip,
@@ -88,11 +112,35 @@ async function start() {
           deprecatedSince: '2026-01-01'
         });
       }
+      
+      // 对非废弃端点，手动记录请求日志
+      req.log.info({
+        req: {
+          method: req.method,
+          url: req.url,
+          host: req.headers?.host,
+          remoteAddress: req.ip,
+          remotePort: req.socket?.remotePort,
+        }
+      }, 'incoming request');
+    });
+    
+    // 手动记录响应完成日志（排除废弃端点）
+    server.addHook('onResponse', async (req: any, reply: any) => {
+      if (isDeprecatedEndpoint(req.url)) {
+        return; // 废弃端点不记录响应日志
+      }
+      
+      const responseTime = req._startTime ? Date.now() - req._startTime : 0;
+      req.log.info({
+        res: { statusCode: reply.statusCode },
+        responseTime
+      }, 'request completed');
     });
     
     // 添加路由中间件（在服务器启动前）
     server.addHook('preHandler', async (req: any, reply: any) => {
-      // 记录请求开始时间
+      // 记录请求开始时间（用于计算响应时间）
       (req as any)._startTime = Date.now();
       
       // 跳过非POST请求和API端点
