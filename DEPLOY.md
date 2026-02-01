@@ -147,14 +147,14 @@ docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_AP
 # 拉取镜像
 docker pull harbor.blacklake.tech/ai/llms:latest
 
-# 默认配置（default，包含 OpenAI 和 OpenRouter）
-docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env harbor.blacklake.tech/ai/llms:latest
+# 默认配置（default，包含 OpenAI 和 OpenRouter，端口 3010）
+docker run -d --name llms-default -p 3010:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=default harbor.blacklake.tech/ai/llms:latest
 
-# MiniMax 配置（端口 3001）
-docker run -d --name llms-minimax -p 3001:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest
+# MiniMax 配置（端口 3009）
+docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=minimax harbor.blacklake.tech/ai/llms:latest
 
-# GLM 配置（端口 3002）
-docker run -d --name llms-glm -p 3002:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=glm harbor.blacklake.tech/ai/llms:latest
+# GLM 配置（端口 3008）
+docker run -d --name llms-glm -p 3008:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=glm harbor.blacklake.tech/ai/llms:latest
 
 # Debug 模式启动（查看详细日志）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
