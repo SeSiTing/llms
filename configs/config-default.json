@@ -14,26 +14,14 @@
       "api_key": "${OPENAI_API_KEY}",
       "models": [
         "gpt-4o",
-        "gpt-5",
-        "gpt-5-pro",
-        "gpt-5.1",
-        "gpt-5.1-pro"
+        "gpt-5.2"
       ],
       "transformer": {
         "use": ["openai"],
         "gpt-4o": {
           "use": ["openai", "openai-responses"]
         },
-        "gpt-5": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5-pro": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5.1": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5.1-pro": {
+        "gpt-5.2": {
           "use": ["openai", "openai-responses"]
         }
       }
@@ -45,21 +33,20 @@
       "api_base_url": "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1/chat/completions}",
       "api_key": "${OPENROUTER_API_KEY}",
       "models": [
-        "x-ai/grok-code-fast-1",
-        "x-ai/grok-4-fast",
+        "x-ai/grok-4.1-fast",
+        "anthropic/claude-opus-4.5",
+        "anthropic/claude-opus-4.6",
         "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-sonnet-4.6",
         "anthropic/claude-haiku-4.5",
-        "anthropic/claude-opus-4.1",
-        "google/gemini-2.5-flash",
-        "google/gemini-2.5-pro",
+        "google/gemini-3-flash-preview",
+        "google/gemini-3.1-pro-preview",
         "google/gemini-3-pro-preview",
-        "minimax/minimax-m2",
-        "openai/gpt-5",
-        "openai/gpt-5-pro",
-        "openai/gpt-5-mini",
-        "openai/gpt-5.1",
-        "openai/gpt-5.1-chat",
-        "openai/gpt-5.1-codex",
+        "minimax/minimax-m2.5",
+        "moonshotai/kimi-k2.5",
+        "z-ai/glm-5",
+        "deepseek/deepseek-v3.2",
+        "openai/gpt-5.2",
         "openai/gpt-5-image"
       ],
       "transformer": {
@@ -68,7 +55,7 @@
     }
   ],
   "Router": {
-    "default": "openrouter,anthropic/claude-sonnet-4.5"
+    "default": "openrouter,anthropic/claude-sonnet-4.6"
   }
 }
 
