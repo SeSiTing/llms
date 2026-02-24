@@ -73,7 +73,7 @@
       "api_base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/anthropic/v1/messages}",
       "api_key": "${ZHIPU_API_KEY}",
       "models": [
-        "glm-4.7"
+        "glm-5"
       ],
       "transformer": {
         "use": ["passthrough"]
@@ -96,7 +96,7 @@
     }
   ],
   "Router": {
-    "default": "zhipu-glm,glm-4.7",
+    "default": "zhipu-glm,glm-5",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
