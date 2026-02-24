@@ -73,7 +73,7 @@
       "api_base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/anthropic/v1/messages}",
       "api_key": "${ZHIPU_API_KEY}",
       "models": [
-        "glm-4.7"
+        "glm-5"
       ],
       "transformer": {
         "use": ["passthrough"]
@@ -100,21 +100,21 @@
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
-        "targetModel": "MiniMax-M2.1",
+        "targetModel": "MiniMax-M2.5",
         "provider": "minimax",
-        "description": "Haiku 映射到 MiniMax 标准版"
+        "description": "Haiku 映射到 MiniMax M2.5"
       },
       {
         "pattern": "claude-sonnet|sonnet",
-        "targetModel": "MiniMax-M2.1",
+        "targetModel": "MiniMax-M2.5",
         "provider": "minimax",
-        "description": "Sonnet 映射到 MiniMax 标准版"
+        "description": "Sonnet 映射到 MiniMax M2.5"
       },
       {
         "pattern": "claude-opus|opus",
-        "targetModel": "MiniMax-M2.1",
+        "targetModel": "MiniMax-M2.5",
         "provider": "minimax",
-        "description": "Opus 映射到 MiniMax 标准版"
+        "description": "Opus 映射到 MiniMax M2.5"
       }
     ]
   }

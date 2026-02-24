@@ -118,8 +118,8 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 服务支持通过环境变量 `LLMS_CONFIG_PROFILE` 选择配置文件：
 
 - **default**: OpenRouter Claude（默认）
-- **minimax**: 将 haiku/sonnet/opus 映射到 MiniMax-M2.1
-- **zhipu**: 将 haiku/sonnet/opus 映射到 GLM-4.7
+- **minimax**: 将 haiku/sonnet/opus 映射到 MiniMax-M2.5
+- **zhipu**: 将 haiku/sonnet/opus 映射到 GLM-5
 
 配置文件位于 `configs/config-${profile}.json`。
 
@@ -134,7 +134,8 @@ docker pull sesiting/llms:latest
 # 使用 zshrc 环境变量启动
 docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
 
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
+# minimax
+docker run -d --name llms-minimax  -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
 
 # 或使用 .env 文件启动
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest

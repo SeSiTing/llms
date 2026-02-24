@@ -86,8 +86,8 @@
       "api_base_url": "${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic/v1/messages}",
       "api_key": "${MINIMAX_API_KEY}",
       "models": [
-        "MiniMax-M2.1",
-        "MiniMax-M2.1-lightning"
+        "MiniMax-M2.5",
+        "MiniMax-M2.5-highspeed"
       ],
       "transformer": {
         "use": ["passthrough"]
@@ -100,21 +100,21 @@
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
-        "targetModel": "glm-4.7",
+        "targetModel": "glm-5",
         "provider": "zhipu-glm",
-        "description": "Haiku 映射到 GLM-4.7"
+        "description": "Haiku 映射到 GLM-5"
       },
       {
         "pattern": "claude-sonnet|sonnet",
-        "targetModel": "glm-4.7",
+        "targetModel": "glm-5",
         "provider": "zhipu-glm",
-        "description": "Sonnet 映射到 GLM-4.7"
+        "description": "Sonnet 映射到 GLM-5"
       },
       {
         "pattern": "claude-opus|opus",
-        "targetModel": "glm-4.7",
+        "targetModel": "glm-5",
         "provider": "zhipu-glm",
-        "description": "Opus 映射到 GLM-4.7"
+        "description": "Opus 映射到 GLM-5"
       }
     ]
   }

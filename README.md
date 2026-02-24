@@ -7,8 +7,8 @@
 - **Anthropic Claude** (Official API)
 - **OpenAI** (GPT series)
 - **Google Gemini** (Official + Vertex AI)
-- **智谱 GLM** (glm-4.7) ⭐ 新增
-- **MiniMax** (M2.1, M2.1-lightning) ⭐ 新增
+- **智谱 GLM** (glm-5) ⭐ 新增
+- **MiniMax** (M2.5, M2.5-highspeed) ⭐ 新增
 - **Deepseek**
 - **Groq**
 - **OpenRouter** (Aggregation service)
@@ -112,14 +112,14 @@ npm start
 When using `config-minimax.json` or `config-zhipu.json`, Claude model names are automatically mapped:
 
 **MiniMax Mapping:**
-- `claude-haiku` / `haiku` → `MiniMax-M2.1`
-- `claude-sonnet` / `sonnet` → `MiniMax-M2.1`
-- `claude-opus` / `opus` → `MiniMax-M2.1`
+- `claude-haiku` / `haiku` → `MiniMax-M2.5`
+- `claude-sonnet` / `sonnet` → `MiniMax-M2.5`
+- `claude-opus` / `opus` → `MiniMax-M2.5`
 
 **Zhipu Mapping:**
-- `claude-haiku` / `haiku` → `glm-4.7`
-- `claude-sonnet` / `sonnet` → `glm-4.7`
-- `claude-opus` / `opus` → `glm-4.7`
+- `claude-haiku` / `haiku` → `glm-5`
+- `claude-sonnet` / `sonnet` → `glm-5`
+- `claude-opus` / `opus` → `glm-5`
 
 ### API Usage Example
 
@@ -132,7 +132,7 @@ const response = await fetch('http://localhost:3001/v1/messages', {
     'x-api-key': 'your-api-key'
   },
   body: JSON.stringify({
-    model: 'claude-sonnet-4.5',  // Will be routed to MiniMax-M2.1
+    model: 'claude-sonnet-4.5',  // Will be routed to MiniMax-M2.5
     messages: [
       { role: 'user', content: 'Hello!' }
     ],
@@ -173,8 +173,8 @@ const response = await fetch('http://localhost:3001/v1/messages', {
 
 ## Pricing Reference
 
-- **GLM-4.7**: Input $2.00/M tokens, Output $8.00/M tokens
-- **MiniMax-M2.1**: Input $2.10/M tokens, Output $8.40/M tokens
+- **GLM-5**: Input $2.00/M tokens, Output $8.00/M tokens
+- **MiniMax-M2.5**: Input $2.10/M tokens, Output $8.40/M tokens
 
 ## API Key Registration
 
