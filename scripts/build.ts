@@ -2,6 +2,36 @@ import * as esbuild from "esbuild";
 
 const watch = process.argv.includes("--watch");
 
+// Node.js 内置模块 - 所有这些都不应该被打包
+const nodeBuiltins = [
+  "child_process",
+  "fs",
+  "fs/promises",
+  "path",
+  "os",
+  "crypto",
+  "stream",
+  "util",
+  "url",
+  "net",
+  "tls",
+  "http",
+  "https",
+  "zlib",
+  "events",
+  "buffer",
+  "querystring",
+  "assert",
+  "perf_hooks",
+  "v8",
+  "vm",
+  "diagnostics_channel",
+  "worker_threads",
+  "module",
+  "repl",
+  "readline",
+];
+
 const baseConfig: esbuild.BuildOptions = {
   entryPoints: ["src/server.ts"],
   bundle: true,
@@ -10,7 +40,15 @@ const baseConfig: esbuild.BuildOptions = {
   platform: "node",
   target: "node18",
   plugins: [],
-  external: ["fastify", "dotenv", "@fastify/cors", "undici", "pino"],
+  external: [
+    "fastify",
+    "dotenv",
+    "@fastify/cors",
+    "undici",
+    "pino",
+    "pino-pretty",
+    ...nodeBuiltins,
+  ],
 };
 
 const cjsConfig: esbuild.BuildOptions = {
@@ -35,7 +73,7 @@ const startConfig: esbuild.BuildOptions = {
   platform: "node",
   target: "node18",
   plugins: [],
-  external: ["fastify", "dotenv", "@fastify/cors", "undici", "pino"],
+  packages: "external",
   outdir: "dist",
   format: "esm",
   outExtension: { ".js": ".mjs" },
