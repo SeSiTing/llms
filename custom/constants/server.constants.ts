@@ -61,21 +61,21 @@ export const DEFAULT_ROUTE_RULES: readonly ModelRouteRule[] = [
   // Claude Haiku 模型
   {
     pattern: "claude-haiku|haiku",
-    targetModel: "anthropic/claude-haiku-4.5",
+    targetModel: "anthropic/claude-haiku-4.6",
     provider: "openrouter",
     description: "识别 Claude Haiku 模型",
   },
   // Claude Sonnet 模型
   {
     pattern: "claude-sonnet|sonnet",
-    targetModel: "anthropic/claude-sonnet-4.5",
+    targetModel: "anthropic/claude-sonnet-4.6",
     provider: "openrouter",
     description: "识别 Claude Sonnet 模型",
   },
   // Claude Opus 模型
   {
     pattern: "claude-opus|opus",
-    targetModel: "anthropic/claude-opus-4.1",
+    targetModel: "anthropic/claude-opus-4.6",
     provider: "openrouter",
     description: "识别 Claude Opus 模型",
   },
