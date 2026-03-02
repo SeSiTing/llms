@@ -61,7 +61,7 @@ export const DEFAULT_ROUTE_RULES: readonly ModelRouteRule[] = [
   // Claude Haiku 模型
   {
     pattern: "claude-haiku|haiku",
-    targetModel: "anthropic/claude-haiku-4.6",
+    targetModel: "anthropic/claude-haiku-4.5",
     provider: "openrouter",
     description: "识别 Claude Haiku 模型",
   },
