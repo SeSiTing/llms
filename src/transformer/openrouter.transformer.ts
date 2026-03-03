@@ -1,6 +1,7 @@
 import { UnifiedChatRequest } from "@/types/llm";
 import { Transformer, TransformerOptions } from "../types/transformer";
 import { v4 as uuidv4 } from "uuid";
+import { sanitizeFunctionName } from "../utils/function-name.util";
 
 export class OpenrouterTransformer implements Transformer {
   static TransformerName = "openrouter";
@@ -10,6 +11,30 @@ export class OpenrouterTransformer implements Transformer {
   async transformRequestIn(
     request: UnifiedChatRequest
   ): Promise<UnifiedChatRequest> {
+    // Handle Gemini models - sanitize function names to comply with API requirements
+    if (request.model.includes("gemini") || request.model.includes("google/")) {
+      if (request.tools && Array.isArray(request.tools)) {
+        const invalidTools: string[] = [];
+        request.tools = request.tools.map((tool) => {
+          const originalName = tool.function.name;
+          const sanitizedName = sanitizeFunctionName(originalName);
+          if (sanitizedName !== originalName) {
+            invalidTools.push(`${originalName} -> ${sanitizedName}`);
+          }
+          return {
+            ...tool,
+            function: {
+              ...tool.function,
+              name: sanitizedName,
+            },
+          };
+        });
+        if (invalidTools.length > 0) {
+          console.log(`[OpenRouter/Gemini] 工具名称已修复:`, invalidTools);
+        }
+      }
+    }
+
     if (!request.model.includes("claude")) {
       request.messages.forEach((msg) => {
         if (Array.isArray(msg.content)) {

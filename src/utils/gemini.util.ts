@@ -1,5 +1,6 @@
 import { UnifiedChatRequest, UnifiedMessage } from "../types/llm";
 import { Content, ContentListUnion, Part, ToolListUnion } from "@google/genai";
+import { sanitizeFunctionName } from "./function-name.util";
 
 export function cleanupParameters(obj: any, keyName?: string): void {
   if (!obj || typeof obj !== "object") {
@@ -243,15 +244,27 @@ export function buildRequestBody(
   request: UnifiedChatRequest
 ): Record<string, any> {
   const tools = [];
+
+  // 打印并修复不符合规范的函数名
+  const invalidTools: string[] = [];
   const functionDeclarations = request.tools
     ?.filter((tool) => tool.function.name !== "web_search")
     ?.map((tool) => {
+      const originalName = tool.function.name;
+      const sanitizedName = sanitizeFunctionName(originalName);
+      if (sanitizedName !== originalName) {
+        invalidTools.push(`${originalName} -> ${sanitizedName}`);
+      }
       return {
-        name: tool.function.name,
+        name: sanitizedName,
         description: tool.function.description,
         parametersJsonSchema: tool.function.parameters,
       };
     });
+
+  if (invalidTools.length > 0) {
+    console.log("[Gemini] 工具名称已修复:", invalidTools);
+  }
   if (functionDeclarations?.length) {
     tools.push(
       tTool({

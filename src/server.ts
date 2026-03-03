@@ -151,7 +151,9 @@ class Server {
                 .code(400)
                 .send({ error: "Missing model in request body" });
             }
-            const [provider, ...model] = body.model.split(",");
+            // 优先使用原始模型名称进行 provider 解析，避免路由转换后导致 provider 解析错误
+            const modelToResolve = (req as any)._originalModel || body.model;
+            const [provider, ...model] = modelToResolve.split(",");
             body.model = model.join(',');
             req.provider = provider;
             return;
