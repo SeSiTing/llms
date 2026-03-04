@@ -46,7 +46,7 @@ docker login
 docker build -t sesiting/llms:${VERSION} -t sesiting/llms:latest .
 
 # 3. 本地测试（使用环境变量）
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
+docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY  -e MOONSHOT_API_KEY sesiting/llms:latest
 
 # 4. 确认无误后推送
 docker push sesiting/llms:${VERSION} && docker push sesiting/llms:latest
@@ -94,6 +94,10 @@ docker pull harbor.blacklake.tech/ai/llms:${VERSION}
 # 添加到 ~/.zshrc
 export OPENROUTER_API_KEY=your-key
 export OPENAI_API_KEY=your-key
+export MOONSHOT_API_KEY=your-key
+# Moonshot 节点（默认 Kimi Coding，可覆盖）:
+# export MOONSHOT_BASE_URL="https://api.moonshot.cn"   # 国内
+# export MOONSHOT_BASE_URL="https://api.moonshot.ai"  # 海外
 
 # 使配置生效
 source ~/.zshrc
@@ -108,6 +112,10 @@ echo "OPENAI_API_KEY=your-key" >> .env
 echo "OPENROUTER_BASE_URL=https://openrouter-proxy.blacklake.cn/api/v1/chat/completions" >> .env
 echo "ZHIPU_API_KEY=your-key" >> .env
 echo "MINIMAX_API_KEY=your-key" >> .env
+echo "MOONSHOT_API_KEY=your-key" >> .env
+# Moonshot 节点（默认 Kimi Coding，可覆盖）:
+# echo "MOONSHOT_BASE_URL=https://api.moonshot.cn" >> .env  # 国内
+# echo "MOONSHOT_BASE_URL=https://api.moonshot.ai" >> .env  # 海外
 
 # 或多行配置
 echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0.0.0.0" > .env
@@ -120,6 +128,13 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 - **default**: OpenRouter Claude（默认）
 - **minimax**: 将 haiku/sonnet/opus 映射到 MiniMax-M2.5
 - **zhipu**: 将 haiku/sonnet/opus 映射到 GLM-5
+- **moonshot**: 直连 Moonshot/Kimi API，默认使用 kimi-k2.5（需 `MOONSHOT_API_KEY`）
+  - `MOONSHOT_BASE_URL` 等与 CC 配置一致（base），我们会自动拼接 `/v1/messages` 作为完整请求 URL
+  - 默认：`https://api.kimi.com/coding`（Kimi Coding，不设则默认）
+  - 国内节点：`MOONSHOT_BASE_URL=https://api.moonshot.cn`
+  - 海外：`MOONSHOT_BASE_URL=https://api.moonshot.ai`
+
+**Moonshot / Zhipu / MiniMax**：三者均使用 Anthropic 协议透传（`type: anthropic`，`transformer: passthrough`），厂商已原生支持 Anthropic API，无需格式转换。CC 可自由切换请求，遇图片时自动切换模型（Router.image）。
 
 配置文件位于 `configs/config-${profile}.json`。
 
@@ -132,10 +147,14 @@ echo -e "OPENROUTER_API_KEY=your-key\nOPENAI_API_KEY=your-key\nPORT=3000\nHOST=0
 docker pull sesiting/llms:latest
 
 # 使用 zshrc 环境变量启动
-docker run -d --name llms -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY sesiting/llms:latest
+docker run -d --name llms -p 3010:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e MOONSHOT_API_KEY sesiting/llms:latest
 
-# minimax
-docker run -d --name llms-minimax  -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
+# minimax 3009
+docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e MOONSHOT_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
+
+# zhipu 3008
+# moonshot 3007
+docker run -d --name llms-moonshot -p 3007:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e MOONSHOT_API_KEY -e LLMS_CONFIG_PROFILE=moonshot sesiting/llms:latest
 
 # 或使用 .env 文件启动
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env sesiting/llms:latest
@@ -156,6 +175,9 @@ docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped --env-fi
 # Zhipu 配置（端口 3008）
 docker run -d --name llms-zhipu -p 3008:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=zhipu harbor.blacklake.tech/ai/llms:latest
 
+# Moonshot 配置（端口 3007）
+docker run -d --name llms-moonshot -p 3007:3000 --restart unless-stopped --env-file .env -e LLMS_CONFIG_PROFILE=moonshot harbor.blacklake.tech/ai/llms:latest
+
 # Debug 模式启动（查看详细日志）
 docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env -e LOG_LEVEL=debug harbor.blacklake.tech/ai/llms:latest
 ```
@@ -164,7 +186,7 @@ docker run -d --name llms -p 3009:3000 --restart unless-stopped --env-file .env 
 - 本地测试：`-e OPENROUTER_API_KEY -e OPENAI_API_KEY` 继承 zshrc 中的环境变量
 - 生产部署：`--env-file .env` 从文件加载环境变量
 - 默认配置：不指定 `LLMS_CONFIG_PROFILE` 时自动使用 `default` 配置
-- `-e LLMS_CONFIG_PROFILE=xxx`：切换配置（`minimax` 或 `zhipu`）
+- `-e LLMS_CONFIG_PROFILE=xxx`：切换配置（`minimax`、`zhipu`、`moonshot`）
 - `-e LOG_LEVEL=debug`：设置日志级别（`debug`、`info`、`warn`、`error`）
 - `-e NODE_ENV=development`：启用美化日志输出（仅开发环境）
 - 模型选择可通过系统界面动态切换
@@ -276,7 +298,11 @@ npm run dev 2>&1 | grep '"msg":"final request"'
 | `OPENAI_API_KEY` | - | OpenAI API 密钥（可选，default 配置需要） |
 | `ZHIPU_API_KEY` | - | 智谱 GLM API 密钥（使用 zhipu 配置时必需） |
 | `MINIMAX_API_KEY` | - | MiniMax API 密钥（使用 minimax 配置时必需） |
-| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（default / minimax / zhipu） |
+| `MOONSHOT_API_KEY` | - | Moonshot/Kimi API 密钥（使用 moonshot 配置时必需） |
+| `MOONSHOT_BASE_URL` | `https://api.kimi.com/coding` | 与 CC 一致，自动拼接 `/v1/messages` |
+| `ZHIPU_BASE_URL` | `https://open.bigmodel.cn/api/anthropic` | 同上 |
+| `MINIMAX_BASE_URL` | `https://api.minimaxi.com/anthropic` | 同上 |
+| `LLMS_CONFIG_PROFILE` | `default` | 配置文件选择器（default / minimax / zhipu / moonshot） |
 | `LOG_LEVEL` | `info` | 日志级别（`debug`、`info`、`warn`、`error`） |
 | `NODE_ENV` | - | 运行环境（`development` 时启用 pino-pretty 美化输出） |
 

@@ -54,6 +54,8 @@ export interface ModelRouteRule {
 export interface RouterConfig {
   /** 默认模型（格式: "provider,model"） */
   default: string;
+  /** 图像任务模型（messages 含 image/image_url 时转发） */
+  image?: string;
   /** 可选的模型路由规则列表 */
   rules?: ModelRouteRule[];
 }

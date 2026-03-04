@@ -7,35 +7,18 @@
   "PROXY_URL": "http://127.0.0.1:7890",
   "providers": [
     {
-      "id": "openai",
-      "name": "openai",
-      "type": "openai",
-      "api_base_url": "https://api.openai.com/v1/chat/completions",
-      "api_key": "${OPENAI_API_KEY}",
+      "id": "moonshot",
+      "name": "moonshot",
+      "type": "anthropic",
+      "api_base_url": "${MOONSHOT_BASE_URL:-https://api.kimi.com/coding}/v1/messages",
+      "api_key": "${MOONSHOT_API_KEY}",
       "models": [
-        "gpt-4o",
-        "gpt-5",
-        "gpt-5-pro",
-        "gpt-5.1",
-        "gpt-5.1-pro"
+        "kimi-k2.5",
+        "kimi-k2",
+        "kimi-k2-thinking"
       ],
       "transformer": {
-        "use": ["openai"],
-        "gpt-4o": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5-pro": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5.1": {
-          "use": ["openai", "openai-responses"]
-        },
-        "gpt-5.1-pro": {
-          "use": ["openai", "openai-responses"]
-        }
+        "use": ["passthrough"]
       }
     },
     {
@@ -70,7 +53,7 @@
       "id": "zhipu-glm",
       "name": "zhipu-glm",
       "type": "anthropic",
-      "api_base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/anthropic/v1/messages}",
+      "api_base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/anthropic}/v1/messages",
       "api_key": "${ZHIPU_API_KEY}",
       "models": [
         "glm-5"
@@ -83,7 +66,7 @@
       "id": "minimax",
       "name": "minimax",
       "type": "anthropic",
-      "api_base_url": "${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic/v1/messages}",
+      "api_base_url": "${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic}/v1/messages",
       "api_key": "${MINIMAX_API_KEY}",
       "models": [
         "MiniMax-M2.5",
@@ -97,6 +80,7 @@
   ],
   "Router": {
     "default": "zhipu-glm,glm-5",
+    "image": "moonshot,kimi-k2.5",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",

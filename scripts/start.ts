@@ -45,6 +45,25 @@ const isDeprecatedEndpoint = (url: string) => {
   return DEPRECATED_PATTERNS.some(pattern => pattern.test(url));
 };
 
+/** 检测 messages 是否包含图片（支持 OpenAI image_url 与 Anthropic image 格式） */
+const hasImageInMessages = (messages: RequestBody["messages"]): boolean => {
+  if (!Array.isArray(messages)) return false;
+  return messages.some(
+    (msg: any) =>
+      msg?.role === "user" &&
+      Array.isArray(msg.content) &&
+      msg.content.some(
+        (item: any) =>
+          item?.type === "image_url" ||
+          item?.type === "image" ||
+          (Array.isArray(item?.content) &&
+            (item.content as any[]).some(
+              (sub: any) => sub?.type === "image" || sub?.type === "image_url"
+            ))
+      )
+  );
+};
+
 // 创建一个空 logger，用于废弃端点
 const createNoopLogger = () => ({
   info: () => {},
@@ -154,7 +173,23 @@ async function start() {
       if (!body || !body.model) {
         return;
       }
-      
+
+      const imageModel = config?.Router?.image;
+      if (
+        imageModel &&
+        body.model !== imageModel &&
+        hasImageInMessages(body.messages)
+      ) {
+        const originalModel = body.model;
+        body.model = imageModel;
+        (req as any)._originalModel = originalModel;
+        req.log.info(
+          { original: originalModel, routed: imageModel, reason: "图像任务" },
+          "[ROUTE] 🔄 ROUTED - 图像模型路由"
+        );
+        return;
+      }
+
       // 如果模型名称不包含逗号，说明需要路由
       if (!body.model.includes(',')) {
         const originalModel = body.model;

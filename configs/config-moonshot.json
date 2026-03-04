@@ -28,21 +28,7 @@
       "api_base_url": "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1/chat/completions}",
       "api_key": "${OPENROUTER_API_KEY}",
       "models": [
-        "x-ai/grok-code-fast-1",
-        "x-ai/grok-4-fast",
-        "anthropic/claude-sonnet-4.5",
-        "anthropic/claude-haiku-4.5",
-        "anthropic/claude-opus-4.1",
-        "google/gemini-2.5-flash",
-        "google/gemini-2.5-pro",
-        "google/gemini-3-pro-preview",
-        "minimax/minimax-m2",
-        "openai/gpt-5",
-        "openai/gpt-5-pro",
-        "openai/gpt-5-mini",
-        "openai/gpt-5.1",
-        "openai/gpt-5.1-chat",
-        "openai/gpt-5.1-codex",
+        "moonshotai/kimi-k2.5",
         "openai/gpt-5-image"
       ],
       "transformer": {
@@ -79,26 +65,32 @@
     }
   ],
   "Router": {
-    "default": "minimax,MiniMax-M2.5",
+    "default": "moonshot,kimi-k2.5",
     "image": "moonshot,kimi-k2.5",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
-        "targetModel": "MiniMax-M2.5",
-        "provider": "minimax",
-        "description": "Haiku 映射到 MiniMax M2.5"
+        "targetModel": "kimi-k2.5",
+        "provider": "moonshot",
+        "description": "Claude Haiku 映射到 Kimi K2.5"
       },
       {
         "pattern": "claude-sonnet|sonnet",
-        "targetModel": "MiniMax-M2.5",
-        "provider": "minimax",
-        "description": "Sonnet 映射到 MiniMax M2.5"
+        "targetModel": "kimi-k2.5",
+        "provider": "moonshot",
+        "description": "Claude Sonnet 映射到 Kimi K2.5"
       },
       {
         "pattern": "claude-opus|opus",
-        "targetModel": "MiniMax-M2.5",
-        "provider": "minimax",
-        "description": "Opus 映射到 MiniMax M2.5"
+        "targetModel": "kimi-k2.5",
+        "provider": "moonshot",
+        "description": "Claude Opus 映射到 Kimi K2.5"
+      },
+      {
+        "pattern": "kimi|k2\\.5|k2",
+        "targetModel": "kimi-k2.5",
+        "provider": "moonshot",
+        "description": "Moonshot/Kimi 模型路由"
       }
     ]
   }
