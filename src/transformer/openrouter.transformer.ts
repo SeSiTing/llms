@@ -1,6 +1,9 @@
 import { UnifiedChatRequest } from "@/types/llm";
-import { Transformer, TransformerOptions } from "../types/transformer";
+import { Transformer, TransformerContext, TransformerOptions } from "../types/transformer";
 import { v4 as uuidv4 } from "uuid";
+
+/** Google Gemini 要求: 字母/下划线开头, 仅 a-zA-Z0-9_.:- , 最长 64 */
+const GEMINI_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_.:-]{0,63}$/;
 
 export class OpenrouterTransformer implements Transformer {
   static TransformerName = "openrouter";
@@ -8,7 +11,9 @@ export class OpenrouterTransformer implements Transformer {
   constructor(private readonly options?: TransformerOptions) {}
 
   async transformRequestIn(
-    request: UnifiedChatRequest
+    request: UnifiedChatRequest,
+    _provider?: any,
+    context?: TransformerContext
   ): Promise<UnifiedChatRequest> {
     if (!request.model.includes("claude")) {
       request.messages.forEach((msg) => {
@@ -41,6 +46,21 @@ export class OpenrouterTransformer implements Transformer {
           });
         }
       });
+    }
+    if (request.model?.includes("qwen") && request.model?.includes("thinking")) {
+      (request as any).reasoning = { ...(request as any).reasoning, enabled: true };
+    }
+    if (context && request.model?.includes("google/") && request.tools?.length) {
+      const valid: typeof request.tools = [];
+      const filtered: string[] = [];
+      for (const t of request.tools) {
+        if (GEMINI_NAME_RE.test(t.function.name)) valid.push(t);
+        else filtered.push(t.function.name);
+      }
+      if (filtered.length) {
+        (context.req as any)?.log?.warn?.({ filtered }, "[openrouter] Gemini 过滤不符合规范的 tool 名称");
+        request.tools = valid.length ? valid : undefined;
+      }
     }
     Object.assign(request, this.options || {});
     return request;
