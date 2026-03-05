@@ -71,7 +71,7 @@
   ],
   "Router": {
     "default": "moonshot,kimi-k2.5",
-    "image": "openrouter,google/gemini-2.5-flash-lite",
+    "image": "moonshot,kimi-k2.5",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
