@@ -152,8 +152,10 @@ docker run -d --name llms -p 3010:3000 --restart unless-stopped -e OPENROUTER_AP
 # minimax 3009
 docker run -d --name llms-minimax -p 3009:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e MOONSHOT_API_KEY -e LLMS_CONFIG_PROFILE=minimax sesiting/llms:latest
 
+
 # zhipu 3008
 # moonshot 3007
+# zhipu 3006
 docker run -d --name llms-moonshot -p 3007:3000 --restart unless-stopped -e OPENROUTER_API_KEY -e OPENAI_API_KEY -e MINIMAX_API_KEY -e ZHIPU_API_KEY -e MOONSHOT_API_KEY -e LLMS_CONFIG_PROFILE=moonshot sesiting/llms:latest
 
 # 或使用 .env 文件启动
