@@ -7,6 +7,22 @@
   "PROXY_URL": "http://127.0.0.1:7890",
   "providers": [
     {
+      "id": "ali",
+      "name": "ali",
+      "type": "anthropic",
+      "api_base_url": "${ALI_BASE_URL:-https://coding.dashscope.aliyuncs.com/apps/anthropic}/v1/messages",
+      "api_key": "${ALI_API_KEY}",
+      "models": [
+        "qwen3.5-plus",
+        "kimi-k2.5",
+        "glm-5",
+        "MiniMax-M2.5"
+      ],
+      "transformer": {
+        "use": ["passthrough"]
+      }
+    },
+    {
       "id": "moonshot",
       "name": "moonshot",
       "type": "anthropic",
