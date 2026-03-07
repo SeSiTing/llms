@@ -111,6 +111,16 @@ async function processRequestTransformers(
   let config = {};
   let bypass = false;
 
+  // 通用处理：截断超长工具名（兼容 kimi/glm/minimax 等限制 64 字符的提供方）
+  if (requestBody.tools?.length) {
+    requestBody.tools = requestBody.tools.map((tool: any) => {
+      if (tool.name && tool.name.length > 64) {
+        return { ...tool, name: tool.name.slice(0, 64) };
+      }
+      return tool;
+    });
+  }
+
   // 检查是否应该跳过转换器（透传参数）
   bypass = shouldBypassTransformers(provider, transformer, body);
 

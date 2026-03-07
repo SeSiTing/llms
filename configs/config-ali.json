@@ -10,7 +10,7 @@
       "id": "ali",
       "name": "ali",
       "type": "anthropic",
-      "api_base_url": "${ALI_BASE_URL:-https://coding.dashscope.aliyuncs.com/apps/anthropic}",
+      "api_base_url": "${ALI_BASE_URL:-https://coding.dashscope.aliyuncs.com/apps/anthropic}/v1/messages",
       "api_key": "${ALI_API_KEY}",
       "models": [
         "qwen3.5-plus",
@@ -93,43 +93,43 @@
         "pattern": "qwen3\\.5|qwen-3\\.5",
         "targetModel": "qwen3.5-plus",
         "provider": "ali",
-        "description": "Qwen3.5 模型路由到阿里云"
+        "description": "Qwen3.5 路由到阿里云"
       },
       {
         "pattern": "kimi|k2\\.5|k2",
         "targetModel": "kimi-k2.5",
         "provider": "ali",
-        "description": "Kimi K2.5 模型路由到阿里云"
+        "description": "Kimi K2.5 路由到阿里云"
       },
       {
-        "pattern": "glm|glm-5",
+        "pattern": "glm",
         "targetModel": "glm-5",
         "provider": "ali",
-        "description": "GLM 模型路由到阿里云"
+        "description": "GLM 路由到阿里云"
       },
       {
         "pattern": "minimax|MiniMax",
         "targetModel": "MiniMax-M2.5",
         "provider": "ali",
-        "description": "MiniMax 模型路由到阿里云"
+        "description": "MiniMax 路由到阿里云"
       },
       {
         "pattern": "claude-haiku|haiku",
-        "targetModel": "kimi-k2.5",
+        "targetModel": "qwen3.5-plus",
         "provider": "ali",
-        "description": "Claude Haiku 映射到 Kimi K2.5"
+        "description": "Claude Haiku 映射到 Qwen3.5"
       },
       {
         "pattern": "claude-sonnet|sonnet",
-        "targetModel": "kimi-k2.5",
+        "targetModel": "qwen3.5-plus",
         "provider": "ali",
-        "description": "Claude Sonnet 映射到 Kimi K2.5"
+        "description": "Claude Sonnet 映射到 Qwen3.5"
       },
       {
         "pattern": "claude-opus|opus",
-        "targetModel": "kimi-k2.5",
+        "targetModel": "qwen3.5-plus",
         "provider": "ali",
-        "description": "Claude Opus 映射到 Kimi K2.5"
+        "description": "Claude Opus 映射到 Qwen3.5"
       }
     ]
   }
