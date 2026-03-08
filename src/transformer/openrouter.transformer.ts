@@ -47,7 +47,8 @@ export class OpenrouterTransformer implements Transformer {
         }
       });
     }
-    if (request.model?.includes("qwen") && request.model?.includes("thinking")) {
+    const models = this.options?.reasoningRequiredModels as string[] | undefined;
+    if (models?.length && request.model && models.includes(request.model)) {
       (request as any).reasoning = { ...(request as any).reasoning, enabled: true };
     }
     if (context && request.model?.includes("google/") && request.tools?.length) {

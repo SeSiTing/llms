@@ -103,10 +103,13 @@ async function start() {
       disableRequestLogging: true,
     });
     
-    // 创建模型路由器
     const defaultModel = getDefaultModel(config);
     const defaultProvider = extractDefaultProvider(defaultModel);
-    const modelRouter = new ModelRouter(config.Router?.rules);
+    const routeRules = config.Router?.rules;
+    if (!routeRules?.length) {
+      throw new Error('Router.rules 必须配置，用于模型路由');
+    }
+    const modelRouter = new ModelRouter(routeRules);
     
     // 手动实现请求日志（排除废弃端点）
     server.addHook('onRequest', async (req: any, reply: any) => {

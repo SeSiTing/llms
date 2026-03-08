@@ -1,4 +1,5 @@
 {
+  "reasoningRequiredModels": ["google/gemini-3.1-pro-preview", "stepfun/step-3.5-flash", "stepfun/step-3.5-flash:free"],
   "LOG": true,
   "LOG_LEVEL": "debug",
   "HOST": "0.0.0.0",
@@ -99,7 +100,12 @@
   ],
   "Router": {
     "default": "openrouter,anthropic/claude-sonnet-4.6",
-    "image": "openrouter,google/gemini-2.5-flash-lite"
+    "image": "openrouter,google/gemini-2.5-flash-lite",
+    "rules": [
+      { "pattern": "claude-haiku|haiku", "targetModel": "anthropic/claude-haiku-4.5", "provider": "openrouter", "description": "Claude Haiku" },
+      { "pattern": "claude-sonnet|sonnet", "targetModel": "anthropic/claude-sonnet-4.6", "provider": "openrouter", "description": "Claude Sonnet" },
+      { "pattern": "claude-opus|opus", "targetModel": "anthropic/claude-opus-4.6", "provider": "openrouter", "description": "Claude Opus" }
+    ]
   }
 }
 

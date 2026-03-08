@@ -1,19 +1,16 @@
 import type { ModelRouteRule } from "../types/config.types.js";
-import { DEFAULT_ROUTE_RULES } from "../constants/server.constants.js";
 
 /**
  * 模型路由器
- * 
+ *
  * 负责将原始模型名称转换为目标模型名称（格式: provider,model）
+ * 规则由 config Router.rules 统一配置，启动时校验必填
  */
 export class ModelRouter {
   private rules: ModelRouteRule[];
 
-  constructor(customRules?: ModelRouteRule[]) {
-    // 合并自定义规则和默认规则，自定义规则优先级更高
-    this.rules = customRules 
-      ? [...customRules, ...DEFAULT_ROUTE_RULES] 
-      : [...DEFAULT_ROUTE_RULES];
+  constructor(rules: ModelRouteRule[]) {
+    this.rules = rules;
   }
 
   /**

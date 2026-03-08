@@ -29,6 +29,24 @@ const interpolateEnvVars = (obj: unknown): unknown => {
   return obj;
 };
 
+/** 将顶层 reasoningRequiredModels 注入到 openrouter transformer options */
+function injectReasoningRequiredModels(config: StartupConfig): void {
+  const models = (config as Record<string, unknown>).reasoningRequiredModels as string[] | undefined;
+  if (!models?.length || !config.providers?.length) return;
+  for (const p of config.providers) {
+    const use = p.transformer?.use;
+    if (!Array.isArray(use)) continue;
+    const mapped = use.map((u) => {
+      if (u === "openrouter") return ["openrouter", { reasoningRequiredModels: models }] as [string, Record<string, unknown>];
+      if (Array.isArray(u) && u[0] === "openrouter") {
+        return ["openrouter", { ...(u[1] || {}), reasoningRequiredModels: models }] as [string, Record<string, unknown>];
+      }
+      return u;
+    });
+    (p.transformer as { use: (string | [string, Record<string, unknown>])[] }).use = mapped;
+  }
+}
+
 /**
  * 读取配置文件
  */
@@ -62,6 +80,7 @@ export const loadConfig = (): StartupConfig | null => {
     logger.info({ msg: '📁 已加载配置文件', path: profileConfigPath, profile });
     
     const interpolatedConfig = interpolateEnvVars(config) as StartupConfig;
+    injectReasoningRequiredModels(interpolatedConfig);
     
     // 打印路由配置
     if (interpolatedConfig.Router) {
