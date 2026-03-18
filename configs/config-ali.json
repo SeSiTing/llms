@@ -98,7 +98,7 @@
   ],
   "Router": {
     "default": "ali,qwen3.5-plus",
-    "image": "ali,qwen3.5-plus",
+    "image": "moonshot,kimi-k2.5",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
