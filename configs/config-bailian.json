@@ -115,26 +115,26 @@
     }
   ],
   "Router": {
-    "default": "zhipu-glm,glm-5",
-    "image": "moonshot,kimi-k2.5",
+    "default": "bailian,qwen3-max",
+    "image": "bailian,qwen3.5-plus",
     "rules": [
       {
         "pattern": "claude-haiku|haiku",
-        "targetModel": "glm-5",
-        "provider": "zhipu-glm",
-        "description": "Haiku 映射到 GLM-5"
+        "targetModel": "qwen3.5-flash",
+        "provider": "bailian",
+        "description": "Haiku 映射到百炼 qwen3.5-flash"
       },
       {
         "pattern": "claude-sonnet|sonnet",
-        "targetModel": "glm-5",
-        "provider": "zhipu-glm",
-        "description": "Sonnet 映射到 GLM-5"
+        "targetModel": "MiniMax/MiniMax-M2.7",
+        "provider": "bailian",
+        "description": "Sonnet 映射到百炼 MiniMax-M2.7"
       },
       {
         "pattern": "claude-opus|opus",
-        "targetModel": "glm-5",
-        "provider": "zhipu-glm",
-        "description": "Opus 映射到 GLM-5"
+        "targetModel": "MiniMax/MiniMax-M2.7",
+        "provider": "bailian",
+        "description": "Opus 映射到百炼 MiniMax-M2.7"
       }
     ]
   }
